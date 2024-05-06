@@ -108,17 +108,17 @@ yum --disablerepo=\* --enablerepo=elrepo-kernel repolist
 yum --disablerepo=\* --enablerepo=elrepo-kernel list kernel*
 
 # 安装长期稳定版本的kernel
-yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-ml.x86_64
+yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-lt.x86_64
 # 删除旧版本工具包
 yum remove kernel-tools-libs.x86_64 kernel-tools.x86_64 -y
 # 安装新版本工具包
-yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-ml-tools.x86_64
+yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-lt-tools.x86_64
 
 #查看默认启动顺序
 awk -F\' '$1=="menuentry " {print $2}' /etc/grub2.cfg  
-CentOS Linux (6.8.9-1.el7.elrepo.x86_64) 7 (Core)
-CentOS Linux (3.10.0-957.el7.x86_64) 7 (Core)
-CentOS Linux (0-rescue-bfcfb6d73a48470c9919e1a3ded47429) 7 (Core)
+CentOS Linux (5.4.275-1.el7.elrepo.x86_64) 7 (Core)
+CentOS Linux (3.10.0-1160.71.1.el7.x86_64) 7 (Core)
+CentOS Linux (0-rescue-fe1fcab895344bfebaa751220353344b) 7 (Core)
 #默认启动的顺序是从0开始，新内核是从头插入（目前位置在0，而4.4.4的是在1），所以需要选择0。
 grub2-set-default 0  
 # 重新生成grub2引导文件

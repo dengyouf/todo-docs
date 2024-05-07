@@ -1439,7 +1439,7 @@ kubectl  label node k8s-worker-02 disktype=ssd
 
 ### Service
 
-## 自动伸缩
+## kubernetes自动伸缩
 
 ### 水平自动伸缩HPA
 

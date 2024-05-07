@@ -51,12 +51,76 @@
 <li class="toctree-l2"><a class="reference internal" href="#id1">kubernetes介绍</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id2">kubernetes架构</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id3">Kubernetes部署</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#kubadmv1-21-0">使用Kubadm快速部署v1.21.0集群</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kubadmv1-22-6">使用Kubadm快速部署v1.22.6集群</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id4">准备环境</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id5">安装容器运行时</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#id6">安装kubernetes集群</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler-unhealthy">解决scheduler Unhealthy 问题</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#add-on">插件Add-on安装</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">kubernetes客户端</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#kubectl">kubectl 命令说明</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id8">获取帮助信息</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9">命令说明</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">命令补全</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">Kubernetes节点管理</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id12">集群信息</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">节点信息</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id14">查看所有节点信息</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15">查看节点描述信息</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">节点标签</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id17">查看节点标签信息</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18">设置节点标签</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id19">通过标签过滤节点</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id20">修改标签</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id21">删除标签</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id22">标签选择器</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id23">kubernetes核心概念</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pod">Pod</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#controller">Controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#label">Label</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#label-selector">Label Selector</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#service">Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#endpoints">Endpoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dns">DNS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id24">kubernetes工作负载</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id25">Pod</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id26">Pod定义</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id27">Pod分类</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id28">Pod管理</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id29">镜像的下载策略</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id30">资源限制</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id31">重启策略</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id32">多容器Pod</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id33">Pod的调度</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id34">调度的约束方法</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id35">生命周期</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id36">健康检查</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id37">状态及故障排查</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id38">Controller</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id39">Service</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id40">自动伸缩</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hpa">水平自动伸缩HPA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vpa">垂直自动伸缩VPA</a></li>
 </ul>
 </li>
 </ul>
@@ -166,11 +230,11 @@
 <blockquote>
 <div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/tasks/tools/">官网</a> ： <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/tasks/tools/</span></code></p>
 </div></blockquote>
-<section id="kubadmv1-21-0">
-<h3>使用Kubadm快速部署v1.21.0集群<a class="headerlink" href="#kubadmv1-21-0" title="Link to this heading"></a></h3>
+<section id="kubadmv1-22-6">
+<h3>使用Kubadm快速部署v1.22.6集群<a class="headerlink" href="#kubadmv1-22-6" title="Link to this heading"></a></h3>
 <p>使用 kubeadm 快速部署Kubernetes集群。操作系统为CentOS 7.6.1810 X86_64，用到的各相关程序版本如下：</p>
 <ul class="simple">
-<li><p>kubernetes： v1.21.0</p></li>
+<li><p>kubernetes： v1.22.6</p></li>
 <li><p>docker：20.10.9</p></li>
 <li><p>calico: 3.21</p></li>
 </ul>
@@ -206,16 +270,14 @@
 </tbody>
 </table><section id="id4">
 <h4>准备环境<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
-<ol class="simple">
-<li><p>主机名hosts文件解析</p></li>
-</ol>
+<p>1.主机名hosts文件解析</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span>  <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">hosts</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
 <span class="mf">192.168.122.21</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> 
 <span class="mf">192.168.122.31</span> <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span> 
 <span class="mf">192.168.122.32</span> <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>
 <span class="mf">192.168.122.33</span> <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>
-<span class="c1"># 此IP用于后期扩展多master使用</span>
-<span class="mf">192.168.122.21</span> <span class="n">kube</span><span class="o">-</span><span class="n">vip</span> 
+<span class="c1"># 用来扩展集群为高可用集群</span>
+<span class="mf">192.168.122.21</span> <span class="n">kubeadm</span><span class="o">-</span><span class="n">vip</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span>
 <span class="n">EOF</span>
 </pre></div>
 </div>
@@ -235,9 +297,7 @@
 <span class="o">*/</span><span class="mi">3</span> <span class="o">*</span> <span class="o">*</span> <span class="o">*</span> <span class="o">*</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">ntpdate</span> <span class="n">time1</span><span class="o">.</span><span class="n">aliyun</span><span class="o">.</span><span class="n">com</span> <span class="o">&amp;&gt;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">null</span>
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>升级系统内核</p></li>
-</ol>
+<p>3.升级系统内核</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span># 载入公钥
 rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 # 安装ELRepo
@@ -248,17 +308,17 @@ yum --disablerepo=\* --enablerepo=elrepo-kernel repolist
 yum --disablerepo=\* --enablerepo=elrepo-kernel list kernel*
 
 # 安装长期稳定版本的kernel
-yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-ml.x86_64
+yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-lt.x86_64
 # 删除旧版本工具包
 yum remove kernel-tools-libs.x86_64 kernel-tools.x86_64 -y
 # 安装新版本工具包
-yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-ml-tools.x86_64
+yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-lt-tools.x86_64
 
 #查看默认启动顺序
 awk -F\&#39; &#39;$1==&quot;menuentry &quot; {print $2}&#39; /etc/grub2.cfg  
-CentOS Linux (6.8.9-1.el7.elrepo.x86_64) 7 (Core)
-CentOS Linux (3.10.0-957.el7.x86_64) 7 (Core)
-CentOS Linux (0-rescue-bfcfb6d73a48470c9919e1a3ded47429) 7 (Core)
+CentOS Linux (5.4.275-1.el7.elrepo.x86_64) 7 (Core)
+CentOS Linux (3.10.0-1160.71.1.el7.x86_64) 7 (Core)
+CentOS Linux (0-rescue-fe1fcab895344bfebaa751220353344b) 7 (Core)
 #默认启动的顺序是从0开始，新内核是从头插入（目前位置在0，而4.4.4的是在1），所以需要选择0。
 grub2-set-default 0  
 # 重新生成grub2引导文件
@@ -267,18 +327,17 @@ grub2-mkconfig -o /boot/grub2/grub.cfg
 reboot
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>配置内核转发以网桥过滤</p></li>
-</ol>
+<p>4.配置内核转发以网桥过滤</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 添加内核配置</span>
 <span class="n">cat</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">k8s</span><span class="o">.</span><span class="n">conf</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
-<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">iptables</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">net</span><span class="o">.</span><span class="n">ipv4</span><span class="o">.</span><span class="n">ip_forward</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">vm</span><span class="o">.</span><span class="n">swappiness</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">net</span><span class="o">.</span><span class="n">bridge</span><span class="o">.</span><span class="n">bridge</span><span class="o">-</span><span class="n">nf</span><span class="o">-</span><span class="n">call</span><span class="o">-</span><span class="n">ip6tables</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">user</span><span class="o">.</span><span class="n">max_user_namespaces</span><span class="o">=</span><span class="mi">28633</span>
+<span class="n">vm</span><span class="o">.</span><span class="n">swappiness</span><span class="o">=</span><span class="mi">0</span>
 <span class="n">EOF</span>
 
-<span class="n">sysctl</span> <span class="o">-</span><span class="n">p</span>  <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysctl</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">k8s</span><span class="o">.</span><span class="n">conf</span>
+<span class="n">sysctl</span>  <span class="o">--</span><span class="n">system</span>
 
 <span class="c1"># 加载 br_netfilter 模块</span>
 <span class="n">modprobe</span>  <span class="n">br_netfilter</span>
@@ -289,15 +348,11 @@ reboot
 <span class="n">bridge</span>                <span class="mi">155432</span>  <span class="mi">1</span> <span class="n">br_netfilter</span>
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>安装 ipset 和 ipvsadm</p></li>
-</ol>
+<p>5.安装 ipset 和 ipvsadm</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">ipvsadm</span> <span class="n">ipset</span> <span class="o">-</span><span class="n">y</span>
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>配置ipvsadm 模块加载</p></li>
-</ol>
+<p>6.配置ipvsadm 模块加载</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysconfig</span><span class="o">/</span><span class="n">modules</span><span class="o">/</span><span class="n">ipvs</span><span class="o">.</span><span class="n">modules</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
 <span class="n">modprobe</span> <span class="n">ip_vs</span>
 <span class="n">modprobe</span> <span class="n">ip_vs_rr</span>
@@ -325,9 +380,7 @@ reboot
 </section>
 <section id="id5">
 <h4>安装容器运行时<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
-<ol class="simple">
-<li><p>安装docker</p></li>
-</ol>
+<p>1.安装docker</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 安装必要的一些系统工具</span>
 <span class="n">yum</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">yum</span><span class="o">-</span><span class="n">utils</span> <span class="n">device</span><span class="o">-</span><span class="n">mapper</span><span class="o">-</span><span class="n">persistent</span><span class="o">-</span><span class="n">data</span> <span class="n">lvm2</span>
 <span class="c1"># 添加软件源信息</span>
@@ -344,9 +397,7 @@ reboot
 <span class="n">systemctl</span> <span class="n">enable</span> <span class="n">docker</span> <span class="o">--</span><span class="n">now</span>
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>配置docker加速器和cgroup方式</p></li>
-</ol>
+<p>2.配置docker加速器和cgroup方式</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span><span class="o">/</span><span class="n">daemon</span><span class="o">.</span><span class="n">json</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
 <span class="p">{</span>
     <span class="s2">&quot;registry-mirrors&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;https://o4uba187.mirror.aliyuncs.com&quot;</span><span class="p">],</span>
@@ -360,9 +411,7 @@ reboot
 </section>
 <section id="id6">
 <h4>安装kubernetes集群<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
-<ol class="simple">
-<li><p>配置kubernetes源</p></li>
-</ol>
+<p>1.配置kubernetes源</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">yum</span><span class="o">.</span><span class="n">repos</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">repo</span>
 <span class="p">[</span><span class="n">kubernetes</span><span class="p">]</span>
 <span class="n">name</span><span class="o">=</span><span class="n">Kubernetes</span>
@@ -374,15 +423,11 @@ reboot
 <span class="n">EOF</span>
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>安装软件包</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">kubeadm</span><span class="o">-</span><span class="mf">1.21.0</span> <span class="n">kubelet</span><span class="o">-</span><span class="mf">1.21.0</span> <span class="n">kubectl</span><span class="o">-</span><span class="mf">1.21.0</span> <span class="o">-</span><span class="n">y</span>     
+<p>2.安装软件包</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">kubeadm</span><span class="o">-</span><span class="mf">1.22.6</span> <span class="n">kubelet</span><span class="o">-</span><span class="mf">1.22.6</span> <span class="n">kubectl</span><span class="o">-</span><span class="mf">1.22.6</span> <span class="o">-</span><span class="n">y</span>     
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>配置kubelet</p></li>
-</ol>
+<p>3.配置kubelet</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&gt;</span>  <span class="n">cat</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sysconfig</span><span class="o">/</span><span class="n">kubelet</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span>
 <span class="n">KUBELET_EXTRA_ARGS</span><span class="o">=</span><span class="s2">&quot;--cgroup-driver=systemd&quot;</span>
 <span class="n">EOF</span>
@@ -390,17 +435,17 @@ reboot
 <span class="n">systemctl</span>  <span class="n">enable</span> <span class="n">kubelet</span> 
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>集群初始化</p></li>
-</ol>
+<p>4.集群初始化</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span># 在 k8s-master-01上执行初始化
-kubeadm init --kubernetes-version=v1.21.0 \
-   --apiserver-advertise-address=192.168.122.21 \
-   --control-plane-endpoint=k8s-vip \
-   --pod-network-cidr=10.244.0.0/16   \
-   --service-cidr=10.96.0.0/12 \
-   --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers | tee kubeadm-init.log
+kubeadm init --kubernetes-version=v1.22.6 \
+    --control-plane-endpoint=kubeadm-vip.linux.io \
+    --apiserver-advertise-address=0.0.0.0 \
+    --pod-network-cidr=10.244.0.0/16   \
+    --service-cidr=10.96.0.0/12 \
+    --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers \
+    --ignore-preflight-errors=Swap | tee kubeadm-init.log
 
+...
 Your Kubernetes control-plane has initialized successfully!
 
 To start using your cluster, you need to run the following as a regular user:
@@ -420,56 +465,37 @@ Run &quot;kubectl apply -f [podnetwork].yaml&quot; with one of the options liste
 You can now join any number of control-plane nodes by copying certificate authorities
 and service account keys on each node and then running the following as root:
 
-  kubeadm join kube-vip:6443 --token ztt1w5.uvhguz3a3exepasv \
-        --discovery-token-ca-cert-hash sha256:a991b8eaa0c558a7ae22f5afd746d554ca13837435d4d866159407d8b0ed54e7 \
+  kubeadm join kubeadm-vip.linux.io:6443 --token mtbnif.ln2ubfsbh2pgbkbr \
+        --discovery-token-ca-cert-hash sha256:944c3832ba58cbc6a2883df9f5eca4ae90945b62081d46a6d1d184b953fb55ea \
         --control-plane 
 
 Then you can join any number of worker nodes by running the following on each as root:
 
-kubeadm join kube-vip:6443 --token ztt1w5.uvhguz3a3exepasv \
-        --discovery-token-ca-cert-hash sha256:a991b8eaa0c558a7ae22f5afd746d554ca13837435d4d866159407d8b0ed54e7 
+kubeadm join kubeadm-vip.linux.io:6443 --token mtbnif.ln2ubfsbh2pgbkbr \
+        --discovery-token-ca-cert-hash sha256:944c3832ba58cbc6a2883df9f5eca4ae90945b62081d46a6d1d184b953fb55ea 
 </pre></div>
 </div>
-<blockquote>
-<div><p>报错：<code class="docutils literal notranslate"><span class="pre">[ERROR</span> <span class="pre">ImagePull]:</span> <span class="pre">failed</span> <span class="pre">to</span> <span class="pre">pull</span> <span class="pre">image</span> <span class="pre">registry.aliyuncs.com/google_containers/coredns/coredns:v1.8.0:</span> <span class="pre">output:</span> <span class="pre">Error</span> <span class="pre">response</span> <span class="pre">from</span> <span class="pre">daemon:</span> <span class="pre">pull</span> <span class="pre">access</span> <span class="pre">denied</span> <span class="pre">for</span> <span class="pre">registry.aliyuncs.com/google_containers/coredns/coredns,</span></code></p>
-</div></blockquote>
-<blockquote>
-<div><p>解决办法：</p>
-</div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">registry</span><span class="o">.</span><span class="n">aliyuncs</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">google_containers</span><span class="o">/</span><span class="n">coredns</span><span class="p">:</span><span class="n">v1</span><span class="mf">.8.0</span> <span class="o">&amp;&amp;</span>
-<span class="n">docker</span> <span class="n">tag</span> <span class="n">registry</span><span class="o">.</span><span class="n">aliyuncs</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">google_containers</span><span class="o">/</span><span class="n">coredns</span><span class="p">:</span><span class="n">v1</span><span class="mf">.8.0</span> <span class="n">registry</span><span class="o">.</span><span class="n">aliyuncs</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">google_containers</span><span class="o">/</span><span class="n">coredns</span><span class="o">/</span><span class="n">coredns</span><span class="p">:</span><span class="n">v1</span><span class="mf">.8.0</span> 
-</pre></div>
-</div>
-<ol class="simple">
-<li><p>配置kubeclt 客户端</p></li>
-</ol>
+<p>5.配置kubeclt 客户端</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
+~]# kubectl  get nodes
+NAME            STATUS   ROLES                  AGE   VERSION
+k8s-master-01   Ready    control-plane,master   46s   v1.22.6
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>添加 worker 节点</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="n">kube</span><span class="o">-</span><span class="n">vip</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="n">ztt1w5</span><span class="o">.</span><span class="n">uvhguz3a3exepasv</span> \
-        <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="n">a991b8eaa0c558a7ae22f5afd746d554ca13837435d4d866159407d8b0ed54e7</span> 
-<span class="c1"># </span>
-<span class="n">kubectl</span>  <span class="n">get</span> <span class="n">nodes</span>
-<span class="n">NAME</span>            <span class="n">STATUS</span>     <span class="n">ROLES</span>                  <span class="n">AGE</span>     <span class="n">VERSION</span>
-<span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>   <span class="n">NotReady</span>   <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>   <span class="mi">4</span><span class="n">m53s</span>   <span class="n">v1</span><span class="mf">.21.0</span>
-<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="n">NotReady</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">3</span><span class="n">m2s</span>    <span class="n">v1</span><span class="mf">.21.0</span>
-<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="n">NotReady</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">3</span><span class="n">m4s</span>    <span class="n">v1</span><span class="mf">.21.0</span>
-<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="n">NotReady</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">3</span><span class="n">m9s</span>    <span class="n">v1</span><span class="mf">.21.0</span>
-</pre></div>
-</div>
-<ol class="simple">
-<li><p>安装网络插件-<a class="reference external" href="https://docs.tigera.io/archive/v3.21/getting-started/kubernetes/quickstart">calico</a></p></li>
-</ol>
+<p>6.安装网络插件-<a class="reference external" href="https://docs.tigera.io/archive/v3.21/getting-started/kubernetes/self-managed-onprem/onpremises">calico</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 安装calico</span>
-<span class="n">kubectl</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="o">.</span><span class="n">projectcalico</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">v3</span><span class="mf">.21</span><span class="o">/</span><span class="n">manifests</span><span class="o">/</span><span class="n">tigera</span><span class="o">-</span><span class="n">operator</span><span class="o">.</span><span class="n">yaml</span>
-<span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="o">.</span><span class="n">projectcalico</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">v3</span><span class="mf">.21</span><span class="o">/</span><span class="n">manifests</span><span class="o">/</span><span class="n">custom</span><span class="o">-</span><span class="n">resources</span><span class="o">.</span><span class="n">yaml</span>
-<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">&#39;s@cidr: 192.168.0.0/16@cidr: 10.244.0.0/16@g&#39;</span> <span class="n">custom</span><span class="o">-</span><span class="n">resources</span><span class="o">.</span><span class="n">yaml</span>                                                     
-<span class="n">kubectl</span>  <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">custom</span><span class="o">-</span><span class="n">resources</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">curl</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">docs</span><span class="o">.</span><span class="n">projectcalico</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">v3</span><span class="mf">.21</span><span class="o">/</span><span class="n">manifests</span><span class="o">/</span><span class="n">calico</span><span class="o">.</span><span class="n">yaml</span> <span class="o">-</span><span class="n">O</span>
+<span class="n">cp</span> <span class="n">calico</span><span class="o">.</span><span class="n">yaml</span><span class="p">{,</span><span class="o">.</span><span class="n">bak</span><span class="p">}</span>
+<span class="n">diff</span> <span class="n">calico</span><span class="o">.</span><span class="n">yaml</span> <span class="n">calico</span><span class="o">.</span><span class="n">yaml</span><span class="o">.</span><span class="n">bak</span> 
+<span class="mi">4242</span><span class="p">,</span><span class="mi">4243</span><span class="n">c4242</span><span class="p">,</span><span class="mi">4243</span>
+<span class="o">&lt;</span>             <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">CALICO_IPV4POOL_CIDR</span>
+<span class="o">&lt;</span>               <span class="n">value</span><span class="p">:</span> <span class="s2">&quot;10.244.0.0/16&quot;</span>
+<span class="o">---</span>
+<span class="o">&gt;</span>             <span class="c1"># - name: CALICO_IPV4POOL_CIDR</span>
+<span class="o">&gt;</span>             <span class="c1">#   value: &quot;192.168.0.0/16&quot;</span>
+<span class="n">kubectl</span>  <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">calico</span><span class="o">.</span><span class="n">yaml</span>
 
 
 <span class="c1"># 安装calictl命令</span>
@@ -478,21 +504,1042 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 <span class="n">mv</span> <span class="o">./</span><span class="n">calicoctl</span>  <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span>
 
 <span class="c1"># 验证</span>
-<span class="n">kubectl</span>  <span class="n">get</span> <span class="n">nodes</span>
-<span class="n">NAME</span>            <span class="n">STATUS</span>   <span class="n">ROLES</span>                  <span class="n">AGE</span>   <span class="n">VERSION</span>
-<span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>   <span class="mi">26</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.21.0</span>
-<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">24</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.21.0</span>
-<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">24</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.21.0</span>
-<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">24</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.21.0</span>
+<span class="c1"># kubectl  get nodes</span>
+<span class="n">NAME</span>            <span class="n">STATUS</span>   <span class="n">ROLES</span>                  <span class="n">AGE</span>     <span class="n">VERSION</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>   <span class="mi">2</span><span class="n">m34s</span>   <span class="n">v1</span><span class="mf">.22.6</span>
 </pre></div>
 </div>
-<ol class="simple">
-<li><p>集群可用性验证</p></li>
-</ol>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">create</span> <span class="n">deployment</span> <span class="n">myapp</span> <span class="o">--</span><span class="n">image</span><span class="o">=</span><span class="n">ikubernetes</span><span class="o">/</span><span class="n">myapp</span><span class="p">:</span><span class="n">v1</span> <span class="o">--</span><span class="n">replicas</span><span class="o">=</span><span class="mi">4</span>
+<p>7.添加 worker 节点</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubeadm</span> <span class="n">join</span> <span class="n">kubeadm</span><span class="o">-</span><span class="n">vip</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="p">:</span><span class="mi">6443</span> <span class="o">--</span><span class="n">token</span> <span class="n">mtbnif</span><span class="o">.</span><span class="n">ln2ubfsbh2pgbkbr</span> \
+        <span class="o">--</span><span class="n">discovery</span><span class="o">-</span><span class="n">token</span><span class="o">-</span><span class="n">ca</span><span class="o">-</span><span class="n">cert</span><span class="o">-</span><span class="nb">hash</span> <span class="n">sha256</span><span class="p">:</span><span class="mi">944</span><span class="n">c3832ba58cbc6a2883df9f5eca4ae90945b62081d46a6d1d184b953fb55ea</span> 
+
+<span class="c1"># kubectl  get nodes</span>
+<span class="n">NAME</span>            <span class="n">STATUS</span>   <span class="n">ROLES</span>                  <span class="n">AGE</span>     <span class="n">VERSION</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>   <span class="mi">4</span><span class="n">m40s</span>   <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">57</span><span class="n">s</span>     <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">39</span><span class="n">s</span>     <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">47</span><span class="n">s</span>     <span class="n">v1</span><span class="mf">.22.6</span>
+</pre></div>
+</div>
+<p>8.启用IPVS模式</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span>  <span class="n">edit</span> <span class="n">cm</span> <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s2">&quot;ipvs&quot;</span> 
+
+<span class="n">kubectl</span>  <span class="n">delete</span> <span class="n">pod</span> <span class="o">-</span><span class="n">n</span> <span class="n">kube</span><span class="o">-</span><span class="n">system</span> <span class="o">-</span><span class="n">l</span> <span class="n">k8s</span><span class="o">-</span><span class="n">app</span><span class="o">=</span><span class="n">kube</span><span class="o">-</span><span class="n">proxy</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># ipvsadm -Ln</span>
+<span class="n">IP</span> <span class="n">Virtual</span> <span class="n">Server</span> <span class="n">version</span> <span class="mf">1.2.1</span> <span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">4096</span><span class="p">)</span>
+<span class="n">Prot</span> <span class="n">LocalAddress</span><span class="p">:</span><span class="n">Port</span> <span class="n">Scheduler</span> <span class="n">Flags</span>
+  <span class="o">-&gt;</span> <span class="n">RemoteAddress</span><span class="p">:</span><span class="n">Port</span>           <span class="n">Forward</span> <span class="n">Weight</span> <span class="n">ActiveConn</span> <span class="n">InActConn</span>
+<span class="n">TCP</span>  <span class="mf">10.96.0.1</span><span class="p">:</span><span class="mi">443</span> <span class="n">rr</span>
+  <span class="o">-&gt;</span> <span class="mf">192.168.122.21</span><span class="p">:</span><span class="mi">6443</span>          <span class="n">Masq</span>    <span class="mi">1</span>      <span class="mi">7</span>          <span class="mi">0</span>         
+<span class="n">TCP</span>  <span class="mf">10.96.0.10</span><span class="p">:</span><span class="mi">53</span> <span class="n">rr</span>
+  <span class="o">-&gt;</span> <span class="mf">10.244.151.129</span><span class="p">:</span><span class="mi">53</span>            <span class="n">Masq</span>    <span class="mi">1</span>      <span class="mi">0</span>          <span class="mi">0</span>         
+  <span class="o">-&gt;</span> <span class="mf">10.244.151.130</span><span class="p">:</span><span class="mi">53</span>            <span class="n">Masq</span>    <span class="mi">1</span>      <span class="mi">0</span>          <span class="mi">0</span>         
+<span class="n">TCP</span>  <span class="mf">10.96.0.10</span><span class="p">:</span><span class="mi">9153</span> <span class="n">rr</span>
+  <span class="o">-&gt;</span> <span class="mf">10.244.151.129</span><span class="p">:</span><span class="mi">9153</span>          <span class="n">Masq</span>    <span class="mi">1</span>      <span class="mi">0</span>          <span class="mi">0</span>         
+  <span class="o">-&gt;</span> <span class="mf">10.244.151.130</span><span class="p">:</span><span class="mi">9153</span>          <span class="n">Masq</span>    <span class="mi">1</span>      <span class="mi">0</span>          <span class="mi">0</span>         
+<span class="n">UDP</span>  <span class="mf">10.96.0.10</span><span class="p">:</span><span class="mi">53</span> <span class="n">rr</span>
+  <span class="o">-&gt;</span> <span class="mf">10.244.151.129</span><span class="p">:</span><span class="mi">53</span>            <span class="n">Masq</span>    <span class="mi">1</span>      <span class="mi">0</span>          <span class="mi">0</span>         
+  <span class="o">-&gt;</span> <span class="mf">10.244.151.130</span><span class="p">:</span><span class="mi">53</span>            <span class="n">Masq</span>    <span class="mi">1</span>      <span class="mi">0</span>          <span class="mi">0</span>   
+</pre></div>
+</div>
+<p>9.集群可用性验证</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl create deployment myapp --image=ikubernetes/myapp:v1 --replicas=4</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl expose deployment myapp  --port=80 --target-port=80   </span>
+
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get pod -o wide    </span>
+<span class="n">NAME</span>                    <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>     <span class="n">IP</span>              <span class="n">NODE</span>            <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="mi">5</span><span class="n">n77q</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m30s</span>   <span class="mf">10.244.36.193</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">fp8cf</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m30s</span>   <span class="mf">10.244.118.65</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">pr49x</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m30s</span>   <span class="mf">10.244.36.194</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">q7skr</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m30s</span>   <span class="mf">10.244.7.128</span>    <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get svc </span>
+<span class="n">NAME</span>         <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>   <span class="n">AGE</span>
+<span class="n">kubernetes</span>   <span class="n">ClusterIP</span>   <span class="mf">10.96.0.1</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">443</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">15</span><span class="n">m</span>
+<span class="n">myapp</span>        <span class="n">ClusterIP</span>   <span class="mf">10.105.232.87</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">80</span><span class="o">/</span><span class="n">TCP</span>    <span class="mi">27</span><span class="n">s</span>
+
+<span class="o">~</span><span class="p">]</span><span class="c1">#  for i in `seq 10`;do curl 10.105.232.87/hostname.html;done</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="mi">5</span><span class="n">n77q</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">fp8cf</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">q7skr</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">pr49x</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="mi">5</span><span class="n">n77q</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">fp8cf</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">q7skr</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">pr49x</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="mi">5</span><span class="n">n77q</span>
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">fp8cf</span>
+
+<span class="o">~</span><span class="p">]</span><span class="c1"># dig -t A www.baidu.com  @10.96.0.10 # 互联网解析</span>
+
+<span class="p">;</span> <span class="o">&lt;&lt;&gt;&gt;</span> <span class="n">DiG</span> <span class="mf">9.11.4</span><span class="o">-</span><span class="n">P2</span><span class="o">-</span><span class="n">RedHat</span><span class="o">-</span><span class="mf">9.11.4</span><span class="o">-</span><span class="mf">26.</span><span class="n">P2</span><span class="o">.</span><span class="n">el7_9</span><span class="mf">.15</span> <span class="o">&lt;&lt;&gt;&gt;</span> <span class="o">-</span><span class="n">t</span> <span class="n">A</span> <span class="n">www</span><span class="o">.</span><span class="n">baidu</span><span class="o">.</span><span class="n">com</span> <span class="o">@</span><span class="mf">10.96.0.10</span>
+<span class="p">;;</span> <span class="k">global</span> <span class="n">options</span><span class="p">:</span> <span class="o">+</span><span class="n">cmd</span>
+<span class="p">;;</span> <span class="n">Got</span> <span class="n">answer</span><span class="p">:</span>
+<span class="p">;;</span> <span class="o">-&gt;&gt;</span><span class="n">HEADER</span><span class="o">&lt;&lt;-</span> <span class="n">opcode</span><span class="p">:</span> <span class="n">QUERY</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="n">NOERROR</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="mi">22228</span>
+<span class="p">;;</span> <span class="n">flags</span><span class="p">:</span> <span class="n">qr</span> <span class="n">rd</span> <span class="n">ra</span><span class="p">;</span> <span class="n">QUERY</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ANSWER</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="n">AUTHORITY</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ADDITIONAL</span><span class="p">:</span> <span class="mi">1</span>
+
+<span class="p">;;</span> <span class="n">OPT</span> <span class="n">PSEUDOSECTION</span><span class="p">:</span>
+<span class="p">;</span> <span class="n">EDNS</span><span class="p">:</span> <span class="n">version</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">flags</span><span class="p">:;</span> <span class="n">udp</span><span class="p">:</span> <span class="mi">4096</span>
+<span class="p">;;</span> <span class="n">QUESTION</span> <span class="n">SECTION</span><span class="p">:</span>
+<span class="p">;</span><span class="n">www</span><span class="o">.</span><span class="n">baidu</span><span class="o">.</span><span class="n">com</span><span class="o">.</span>                 <span class="n">IN</span>      <span class="n">A</span>
+
+<span class="p">;;</span> <span class="n">ANSWER</span> <span class="n">SECTION</span><span class="p">:</span>
+<span class="n">www</span><span class="o">.</span><span class="n">baidu</span><span class="o">.</span><span class="n">com</span><span class="o">.</span>          <span class="mi">30</span>      <span class="n">IN</span>      <span class="n">CNAME</span>   <span class="n">www</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">shifen</span><span class="o">.</span><span class="n">com</span><span class="o">.</span>
+<span class="n">www</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">shifen</span><span class="o">.</span><span class="n">com</span><span class="o">.</span>       <span class="mi">30</span>      <span class="n">IN</span>      <span class="n">A</span>       <span class="mf">110.242.68.3</span>
+<span class="n">www</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">shifen</span><span class="o">.</span><span class="n">com</span><span class="o">.</span>       <span class="mi">30</span>      <span class="n">IN</span>      <span class="n">A</span>       <span class="mf">110.242.68.4</span>
+
+<span class="p">;;</span> <span class="n">Query</span> <span class="n">time</span><span class="p">:</span> <span class="mi">16</span> <span class="n">msec</span>
+<span class="p">;;</span> <span class="n">SERVER</span><span class="p">:</span> <span class="mf">10.96.0.10</span><span class="c1">#53(10.96.0.10)</span>
+<span class="p">;;</span> <span class="n">WHEN</span><span class="p">:</span> <span class="n">Tue</span> <span class="n">May</span> <span class="mi">07</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">15</span> <span class="n">CST</span> <span class="mi">2024</span>
+<span class="p">;;</span> <span class="n">MSG</span> <span class="n">SIZE</span>  <span class="n">rcvd</span><span class="p">:</span> <span class="mi">149</span>
+
+<span class="o">~</span><span class="p">]</span><span class="c1"># dig -t A myapp.default.svc.cluster.local  @10.96.0.10  # 集群内部解析            </span>
+<span class="p">;</span> <span class="o">&lt;&lt;&gt;&gt;</span> <span class="n">DiG</span> <span class="mf">9.11.4</span><span class="o">-</span><span class="n">P2</span><span class="o">-</span><span class="n">RedHat</span><span class="o">-</span><span class="mf">9.11.4</span><span class="o">-</span><span class="mf">26.</span><span class="n">P2</span><span class="o">.</span><span class="n">el7_9</span><span class="mf">.15</span> <span class="o">&lt;&lt;&gt;&gt;</span> <span class="o">-</span><span class="n">t</span> <span class="n">A</span> <span class="n">myapp</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span> <span class="o">@</span><span class="mf">10.96.0.10</span>
+<span class="p">;;</span> <span class="k">global</span> <span class="n">options</span><span class="p">:</span> <span class="o">+</span><span class="n">cmd</span>
+<span class="p">;;</span> <span class="n">Got</span> <span class="n">answer</span><span class="p">:</span>
+<span class="p">;;</span> <span class="n">WARNING</span><span class="p">:</span> <span class="o">.</span><span class="n">local</span> <span class="ow">is</span> <span class="n">reserved</span> <span class="k">for</span> <span class="n">Multicast</span> <span class="n">DNS</span>
+<span class="p">;;</span> <span class="n">You</span> <span class="n">are</span> <span class="n">currently</span> <span class="n">testing</span> <span class="n">what</span> <span class="n">happens</span> <span class="n">when</span> <span class="n">an</span> <span class="n">mDNS</span> <span class="n">query</span> <span class="ow">is</span> <span class="n">leaked</span> <span class="n">to</span> <span class="n">DNS</span>
+<span class="p">;;</span> <span class="o">-&gt;&gt;</span><span class="n">HEADER</span><span class="o">&lt;&lt;-</span> <span class="n">opcode</span><span class="p">:</span> <span class="n">QUERY</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="n">NOERROR</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="mi">31000</span>
+<span class="p">;;</span> <span class="n">flags</span><span class="p">:</span> <span class="n">qr</span> <span class="n">aa</span> <span class="n">rd</span><span class="p">;</span> <span class="n">QUERY</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ANSWER</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">AUTHORITY</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">ADDITIONAL</span><span class="p">:</span> <span class="mi">1</span>
+<span class="p">;;</span> <span class="n">WARNING</span><span class="p">:</span> <span class="n">recursion</span> <span class="n">requested</span> <span class="n">but</span> <span class="ow">not</span> <span class="n">available</span>
+
+<span class="p">;;</span> <span class="n">OPT</span> <span class="n">PSEUDOSECTION</span><span class="p">:</span>
+<span class="p">;</span> <span class="n">EDNS</span><span class="p">:</span> <span class="n">version</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">flags</span><span class="p">:;</span> <span class="n">udp</span><span class="p">:</span> <span class="mi">4096</span>
+<span class="p">;;</span> <span class="n">QUESTION</span> <span class="n">SECTION</span><span class="p">:</span>
+<span class="p">;</span><span class="n">myapp</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span><span class="o">.</span> <span class="n">IN</span>    <span class="n">A</span>
+
+<span class="p">;;</span> <span class="n">ANSWER</span> <span class="n">SECTION</span><span class="p">:</span>
+<span class="n">myapp</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">svc</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">local</span><span class="o">.</span> <span class="mi">30</span> <span class="n">IN</span>  <span class="n">A</span>       <span class="mf">10.110.165.183</span>
+
+<span class="p">;;</span> <span class="n">Query</span> <span class="n">time</span><span class="p">:</span> <span class="mi">0</span> <span class="n">msec</span>
+<span class="p">;;</span> <span class="n">SERVER</span><span class="p">:</span> <span class="mf">10.96.0.10</span><span class="c1">#53(10.96.0.10)</span>
+<span class="p">;;</span> <span class="n">WHEN</span><span class="p">:</span> <span class="n">Tue</span> <span class="n">May</span> <span class="mi">07</span> <span class="mi">09</span><span class="p">:</span><span class="mi">06</span><span class="p">:</span><span class="mi">36</span> <span class="n">CST</span> <span class="mi">2024</span>
+<span class="p">;;</span> <span class="n">MSG</span> <span class="n">SIZE</span>  <span class="n">rcvd</span><span class="p">:</span> <span class="mi">107</span>
 </pre></div>
 </div>
 </section>
+<section id="scheduler-unhealthy">
+<h4>解决scheduler Unhealthy 问题<a class="headerlink" href="#scheduler-unhealthy" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span>  <span class="n">get</span> <span class="n">cs</span>
+<span class="ne">Warning</span><span class="p">:</span> <span class="n">v1</span> <span class="n">ComponentStatus</span> <span class="ow">is</span> <span class="n">deprecated</span> <span class="ow">in</span> <span class="n">v1</span><span class="mf">.19</span><span class="o">+</span>
+<span class="n">NAME</span>                 <span class="n">STATUS</span>      <span class="n">MESSAGE</span>                                                                                       <span class="n">ERROR</span>
+<span class="n">scheduler</span>            <span class="n">Unhealthy</span>   <span class="n">Get</span> <span class="s2">&quot;http://127.0.0.1:10251/healthz&quot;</span><span class="p">:</span> <span class="n">dial</span> <span class="n">tcp</span> <span class="mf">127.0.0.1</span><span class="p">:</span><span class="mi">10251</span><span class="p">:</span> <span class="n">connect</span><span class="p">:</span> <span class="n">connection</span> <span class="n">refused</span>   
+<span class="n">controller</span><span class="o">-</span><span class="n">manager</span>   <span class="n">Healthy</span>     <span class="n">ok</span>                                                                                            
+<span class="n">etcd</span><span class="o">-</span><span class="mi">0</span>               <span class="n">Healthy</span>     <span class="p">{</span><span class="s2">&quot;health&quot;</span><span class="p">:</span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="s2">&quot;reason&quot;</span><span class="p">:</span><span class="s2">&quot;&quot;</span><span class="p">}</span> 
+
+<span class="c1"># 解决方案</span>
+<span class="n">cp</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">manifests</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span><span class="o">.</span><span class="n">yaml</span><span class="p">{,</span><span class="o">.</span><span class="n">bak</span><span class="p">}</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># diff /etc/kubernetes/manifests/kube-scheduler.yaml{,.bak} </span>
+<span class="mi">19</span><span class="n">c19</span>
+<span class="o">&lt;</span>     <span class="c1"># - --port=0</span>
+<span class="o">---</span>
+<span class="o">&gt;</span>     <span class="o">-</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">0</span>
+
+<span class="o">~</span><span class="p">]</span><span class="c1"># rm -rf  /etc/kubernetes/manifests/kube-scheduler.yaml.bak # 需删除此文件</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># systemctl  restart kubelet</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get cs</span>
+<span class="ne">Warning</span><span class="p">:</span> <span class="n">v1</span> <span class="n">ComponentStatus</span> <span class="ow">is</span> <span class="n">deprecated</span> <span class="ow">in</span> <span class="n">v1</span><span class="mf">.19</span><span class="o">+</span>
+<span class="n">NAME</span>                 <span class="n">STATUS</span>    <span class="n">MESSAGE</span>                         <span class="n">ERROR</span>
+<span class="n">scheduler</span>            <span class="n">Healthy</span>   <span class="n">ok</span>                              
+<span class="n">controller</span><span class="o">-</span><span class="n">manager</span>   <span class="n">Healthy</span>   <span class="n">ok</span>                              
+<span class="n">etcd</span><span class="o">-</span><span class="mi">0</span>               <span class="n">Healthy</span>   <span class="p">{</span><span class="s2">&quot;health&quot;</span><span class="p">:</span><span class="s2">&quot;true&quot;</span><span class="p">,</span><span class="s2">&quot;reason&quot;</span><span class="p">:</span><span class="s2">&quot;&quot;</span><span class="p">}</span>   
+</pre></div>
+</div>
+</section>
+<section id="add-on">
+<h4>插件Add-on安装<a class="headerlink" href="#add-on" title="Link to this heading"></a></h4>
+<p><strong>安装Dashboard UI</strong></p>
+<p>1.安装<a class="reference external" href="https://github.com/kubernetes/dashboard">dashboard</a></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># wget https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.1/aio/deploy/recommended.yaml</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># cp recommended.yaml{,.bak}</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># diff recommended.yaml{,.bak}</span>
+<span class="mi">40</span><span class="n">d39</span>
+<span class="o">&lt;</span>   <span class="nb">type</span><span class="p">:</span> <span class="n">NodePort</span>
+<span class="mi">44</span><span class="n">d42</span>
+<span class="o">&lt;</span>       <span class="n">nodePort</span><span class="p">:</span> <span class="mi">30010</span>
+
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  apply -f recommended.yaml</span>
+</pre></div>
+</div>
+<p>2.创建用户</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&gt;</span> <span class="n">admin</span><span class="o">-</span><span class="n">user</span><span class="o">.</span><span class="n">yaml</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">ServiceAccount</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">admin</span><span class="o">-</span><span class="n">user</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">rbac</span><span class="o">.</span><span class="n">authorization</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">ClusterRoleBinding</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">admin</span><span class="o">-</span><span class="n">user</span>
+<span class="n">roleRef</span><span class="p">:</span>
+  <span class="n">apiGroup</span><span class="p">:</span> <span class="n">rbac</span><span class="o">.</span><span class="n">authorization</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span>
+  <span class="n">kind</span><span class="p">:</span> <span class="n">ClusterRole</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">cluster</span><span class="o">-</span><span class="n">admin</span>
+<span class="n">subjects</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">kind</span><span class="p">:</span> <span class="n">ServiceAccount</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">admin</span><span class="o">-</span><span class="n">user</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Secret</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">admin</span><span class="o">-</span><span class="n">user</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span>
+  <span class="n">annotations</span><span class="p">:</span>
+    <span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">service</span><span class="o">-</span><span class="n">account</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="s2">&quot;admin-user&quot;</span>   
+<span class="nb">type</span><span class="p">:</span> <span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">service</span><span class="o">-</span><span class="n">account</span><span class="o">-</span><span class="n">token</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+<p>3.获取token</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">get</span> <span class="n">secret</span> <span class="n">admin</span><span class="o">-</span><span class="n">user</span> <span class="o">-</span><span class="n">n</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">dashboard</span> <span class="o">-</span><span class="n">o</span> <span class="n">jsonpath</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;.data.token&quot;</span><span class="p">}</span> <span class="o">|</span> <span class="n">base64</span> <span class="o">-</span><span class="n">d</span>
+</pre></div>
+</div>
+<p>4.访问dashboard</p>
+<ul class="simple">
+<li><p>访问地址： http://IP:30010
+<a class="reference external" href="../images/dashboard1.png"></a></p></li>
+</ul>
+<p><strong>部署<a class="reference external" href="https://github.com/kubernetes-sigs/metrics-server/releases">metrics-server</a></strong></p>
+<p>1.安装</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">sigs</span><span class="o">/</span><span class="n">metrics</span><span class="o">-</span><span class="n">server</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">download</span><span class="o">/</span><span class="n">v0</span><span class="mf">.7.1</span><span class="o">/</span><span class="n">components</span><span class="o">.</span><span class="n">yaml</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># cp components.yaml{,.bak}</span>
+<span class="n">diff</span>  <span class="n">components</span><span class="o">.</span><span class="n">yaml</span><span class="p">{,</span><span class="o">.</span><span class="n">bak</span><span class="p">}</span>
+<span class="mi">140</span><span class="p">,</span><span class="mi">141</span><span class="n">c140</span>
+<span class="o">&lt;</span>         <span class="o">-</span> <span class="o">--</span><span class="n">kubelet</span><span class="o">-</span><span class="n">insecure</span><span class="o">-</span><span class="n">tls</span>
+<span class="o">&lt;</span>         <span class="n">image</span><span class="p">:</span> <span class="n">k8s</span><span class="o">.</span><span class="n">dockerproxy</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">metrics</span><span class="o">-</span><span class="n">server</span><span class="o">/</span><span class="n">metrics</span><span class="o">-</span><span class="n">server</span><span class="p">:</span><span class="n">v0</span><span class="mf">.7.1</span>
+<span class="o">---</span>
+<span class="o">&gt;</span>         <span class="n">image</span><span class="p">:</span> <span class="n">registry</span><span class="o">.</span><span class="n">k8s</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">metrics</span><span class="o">-</span><span class="n">server</span><span class="o">/</span><span class="n">metrics</span><span class="o">-</span><span class="n">server</span><span class="p">:</span><span class="n">v0</span><span class="mf">.7.1</span>
+</pre></div>
+</div>
+<p>2.授权解决报错：<code class="docutils literal notranslate"><span class="pre">Error</span> <span class="pre">from</span> <span class="pre">server</span> <span class="pre">(ServiceUnavailable):</span> <span class="pre">the</span> <span class="pre">server</span> <span class="pre">is</span> <span class="pre">currently</span> <span class="pre">unable</span> <span class="pre">to</span> <span class="pre">handle</span> <span class="pre">the</span> <span class="pre">request</span> <span class="pre">(get</span> <span class="pre">nodes.metrics.k8s.io)</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span>  <span class="n">create</span> <span class="n">clusterrolebinding</span> <span class="n">system</span><span class="p">:</span><span class="n">anonymous</span> <span class="o">--</span><span class="n">clusterrole</span><span class="o">=</span><span class="n">cluster</span><span class="o">-</span><span class="n">admin</span> <span class="o">--</span><span class="n">user</span><span class="o">=</span><span class="n">system</span><span class="p">:</span><span class="n">anonymous</span> 
+</pre></div>
+</div>
+<p>3.验证</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  top nodes</span>
+<span class="n">NAME</span>            <span class="n">CPU</span><span class="p">(</span><span class="n">cores</span><span class="p">)</span>   <span class="n">CPU</span><span class="o">%</span>   <span class="n">MEMORY</span><span class="p">(</span><span class="nb">bytes</span><span class="p">)</span>   <span class="n">MEMORY</span><span class="o">%</span>   
+<span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>   <span class="mi">193</span><span class="n">m</span>         <span class="mi">4</span><span class="o">%</span>     <span class="mi">1804</span><span class="n">Mi</span>          <span class="mi">23</span><span class="o">%</span>       
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="mi">95</span><span class="n">m</span>          <span class="mi">2</span><span class="o">%</span>     <span class="mi">901</span><span class="n">Mi</span>           <span class="mi">11</span><span class="o">%</span>       
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="mi">83</span><span class="n">m</span>          <span class="mi">2</span><span class="o">%</span>     <span class="mi">933</span><span class="n">Mi</span>           <span class="mi">12</span><span class="o">%</span>       
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="mi">88</span><span class="n">m</span>          <span class="mi">2</span><span class="o">%</span>     <span class="mi">650</span><span class="n">Mi</span>           <span class="mi">8</span><span class="o">%</span>        
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  top pods</span>
+<span class="n">NAME</span>                    <span class="n">CPU</span><span class="p">(</span><span class="n">cores</span><span class="p">)</span>   <span class="n">MEMORY</span><span class="p">(</span><span class="nb">bytes</span><span class="p">)</span>   
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="mi">5</span><span class="n">n77q</span>   <span class="mi">0</span><span class="n">m</span>           <span class="mi">1</span><span class="n">Mi</span>             
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">fp8cf</span>   <span class="mi">0</span><span class="n">m</span>           <span class="mi">1</span><span class="n">Mi</span>             
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">h7zv8</span>   <span class="mi">0</span><span class="n">m</span>           <span class="mi">1</span><span class="n">Mi</span>             
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">pr49x</span>   <span class="mi">0</span><span class="n">m</span>           <span class="mi">1</span><span class="n">Mi</span>     
+</pre></div>
+</div>
+<p><a class="reference external" href="../images/dashboard2.png"></a></p>
+</section>
+</section>
+</section>
+<section id="id7">
+<h2>kubernetes客户端<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<section id="kubectl">
+<h3>kubectl 命令说明<a class="headerlink" href="#kubectl" title="Link to this heading"></a></h3>
+<section id="id8">
+<h4>获取帮助信息<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w">  </span>-h
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h4>命令说明<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>基础命令</p>
+<ul>
+<li><p>create</p></li>
+<li><p>expose</p></li>
+<li><p>run</p></li>
+<li><p>set</p></li>
+<li><p>explain</p></li>
+<li><p>edit</p></li>
+<li><p>delete</p></li>
+</ul>
+</li>
+<li><p>部署命令</p>
+<ul>
+<li><p>rollout</p></li>
+<li><p>rolling-oupdate</p></li>
+<li><p>scale</p></li>
+<li><p>autoscale</p></li>
+</ul>
+</li>
+<li><p>集群管理命令</p>
+<ul>
+<li><p>certificate</p></li>
+<li><p>cluster-info</p></li>
+<li><p>top</p></li>
+<li><p>cordon</p></li>
+<li><p>uncordon</p></li>
+<li><p>drain</p></li>
+<li><p>taint</p></li>
+</ul>
+</li>
+<li><p>故障诊断和调式命令</p>
+<ul>
+<li><p>describe</p></li>
+<li><p>logs</p></li>
+<li><p>attach</p></li>
+<li><p>exec</p></li>
+<li><p>port-forward</p></li>
+<li><p>proxy</p></li>
+<li><p>cp</p></li>
+<li><p>auth</p></li>
+</ul>
+</li>
+<li><p>高级命令</p>
+<ul>
+<li><p>apply</p></li>
+<li><p>patch</p></li>
+<li><p>replace</p></li>
+<li><p>convert</p></li>
+</ul>
+</li>
+<li><p>设置命令</p>
+<ul>
+<li><p>label</p></li>
+<li><p>annotate</p></li>
+<li><p>completion</p></li>
+</ul>
+</li>
+<li><p>其它命令</p>
+<ul>
+<li><p>api-versions</p></li>
+<li><p>config</p></li>
+<li><p>help</p></li>
+<li><p>plugin</p></li>
+<li><p>version</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id10">
+<h4>命令补全<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">bash</span><span class="o">-</span><span class="n">completion</span>
+<span class="n">source</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">bash</span><span class="o">-</span><span class="n">completion</span><span class="o">/</span><span class="n">bash_completion</span> 
+<span class="n">source</span>  <span class="o">&lt;</span><span class="p">(</span><span class="n">kubectl</span> <span class="n">completion</span> <span class="n">bash</span><span class="p">)</span>
+<span class="n">kubectl</span>  <span class="n">completion</span> <span class="n">bash</span> <span class="o">&gt;</span> <span class="o">~/.</span><span class="n">kube</span><span class="o">/</span><span class="n">completion</span><span class="o">.</span><span class="n">bash</span><span class="o">.</span><span class="n">inc</span>
+<span class="n">source</span>  <span class="s1">&#39;/root/.kube/completion.bash.inc&#39;</span>
+<span class="n">echo</span> <span class="s2">&quot;source  &#39;/root/.kube/completion.bash.inc&#39;&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">~/.</span><span class="n">bashrc</span> 
+<span class="n">source</span>  <span class="o">~/.</span><span class="n">bashrc</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id11">
+<h2>Kubernetes节点管理<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<section id="id12">
+<h3>集群信息<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl cluster-info </span>
+<span class="n">Kubernetes</span> <span class="n">control</span> <span class="n">plane</span> <span class="ow">is</span> <span class="n">running</span> <span class="n">at</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">kubeadm</span><span class="o">-</span><span class="n">vip</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="p">:</span><span class="mi">6443</span>
+<span class="n">CoreDNS</span> <span class="ow">is</span> <span class="n">running</span> <span class="n">at</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">kubeadm</span><span class="o">-</span><span class="n">vip</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="p">:</span><span class="mi">6443</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">v1</span><span class="o">/</span><span class="n">namespaces</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">system</span><span class="o">/</span><span class="n">services</span><span class="o">/</span><span class="n">kube</span><span class="o">-</span><span class="n">dns</span><span class="p">:</span><span class="n">dns</span><span class="o">/</span><span class="n">proxy</span>
+
+<span class="n">To</span> <span class="n">further</span> <span class="n">debug</span> <span class="ow">and</span> <span class="n">diagnose</span> <span class="n">cluster</span> <span class="n">problems</span><span class="p">,</span> <span class="n">use</span> <span class="s1">&#39;kubectl cluster-info dump&#39;</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="id13">
+<h3>节点信息<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<section id="id14">
+<h4>查看所有节点信息<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get nodes</span>
+<span class="n">NAME</span>            <span class="n">STATUS</span>   <span class="n">ROLES</span>                  <span class="n">AGE</span>    <span class="n">VERSION</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>   <span class="mi">124</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">120</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">120</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">120</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get node k8s-worker-01 -o wide</span>
+<span class="n">NAME</span>            <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>    <span class="n">VERSION</span>   <span class="n">INTERNAL</span><span class="o">-</span><span class="n">IP</span>      <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">OS</span><span class="o">-</span><span class="n">IMAGE</span>                <span class="n">KERNEL</span><span class="o">-</span><span class="n">VERSION</span>              <span class="n">CONTAINER</span><span class="o">-</span><span class="n">RUNTIME</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">121</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>   <span class="mf">192.168.122.31</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="n">CentOS</span> <span class="n">Linux</span> <span class="mi">7</span> <span class="p">(</span><span class="n">Core</span><span class="p">)</span>   <span class="mf">6.8.9</span><span class="o">-</span><span class="mf">1.</span><span class="n">el7</span><span class="o">.</span><span class="n">elrepo</span><span class="o">.</span><span class="n">x86_64</span>   <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10.9</span>
+</pre></div>
+</div>
+</section>
+<section id="id15">
+<h4>查看节点描述信息<a class="headerlink" href="#id15" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  describe node k8s-master-01</span>
+<span class="n">Name</span><span class="p">:</span>               <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>
+<span class="n">Roles</span><span class="p">:</span>              <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>
+<span class="n">Labels</span><span class="p">:</span>             <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span>
+                    <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+                    <span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span>
+                    <span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>
+                    <span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+                    <span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="o">=</span>
+                    <span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">master</span><span class="o">=</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">exclude</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">external</span><span class="o">-</span><span class="n">load</span><span class="o">-</span><span class="n">balancers</span><span class="o">=</span>
+<span class="n">Annotations</span><span class="p">:</span>        <span class="n">kubeadm</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">cri</span><span class="o">-</span><span class="n">socket</span><span class="p">:</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">dockershim</span><span class="o">.</span><span class="n">sock</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">ttl</span><span class="p">:</span> <span class="mi">0</span>
+                    <span class="n">projectcalico</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">IPv4Address</span><span class="p">:</span> <span class="mf">192.168.122.21</span><span class="o">/</span><span class="mi">24</span>
+                    <span class="n">projectcalico</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">IPv4IPIPTunnelAddr</span><span class="p">:</span> <span class="mf">10.244.151.128</span>
+                    <span class="n">volumes</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">controller</span><span class="o">-</span><span class="n">managed</span><span class="o">-</span><span class="n">attach</span><span class="o">-</span><span class="n">detach</span><span class="p">:</span> <span class="n">true</span>
+<span class="n">CreationTimestamp</span><span class="p">:</span>  <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">09</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">33</span> <span class="o">+</span><span class="mi">0800</span>
+<span class="n">Taints</span><span class="p">:</span>             <span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">master</span><span class="p">:</span><span class="n">NoSchedule</span>
+<span class="n">Unschedulable</span><span class="p">:</span>      <span class="n">false</span>
+<span class="n">Lease</span><span class="p">:</span>
+  <span class="n">HolderIdentity</span><span class="p">:</span>  <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>
+  <span class="n">AcquireTime</span><span class="p">:</span>     <span class="o">&lt;</span><span class="n">unset</span><span class="o">&gt;</span>
+  <span class="n">RenewTime</span><span class="p">:</span>       <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">11</span><span class="p">:</span><span class="mi">36</span><span class="p">:</span><span class="mi">58</span> <span class="o">+</span><span class="mi">0800</span>
+<span class="n">Conditions</span><span class="p">:</span>
+  <span class="n">Type</span>                 <span class="n">Status</span>  <span class="n">LastHeartbeatTime</span>                 <span class="n">LastTransitionTime</span>                <span class="n">Reason</span>                       <span class="n">Message</span>
+  <span class="o">----</span>                 <span class="o">------</span>  <span class="o">-----------------</span>                 <span class="o">------------------</span>                <span class="o">------</span>                       <span class="o">-------</span>
+  <span class="n">NetworkUnavailable</span>   <span class="kc">False</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">09</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">11</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">09</span><span class="p">:</span><span class="mi">40</span><span class="p">:</span><span class="mi">11</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">CalicoIsUp</span>                   <span class="n">Calico</span> <span class="ow">is</span> <span class="n">running</span> <span class="n">on</span> <span class="n">this</span> <span class="n">node</span>
+  <span class="n">MemoryPressure</span>       <span class="kc">False</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">11</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">45</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">09</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">KubeletHasSufficientMemory</span>   <span class="n">kubelet</span> <span class="n">has</span> <span class="n">sufficient</span> <span class="n">memory</span> <span class="n">available</span>
+  <span class="n">DiskPressure</span>         <span class="kc">False</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">11</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">45</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">09</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">KubeletHasNoDiskPressure</span>     <span class="n">kubelet</span> <span class="n">has</span> <span class="n">no</span> <span class="n">disk</span> <span class="n">pressure</span>
+  <span class="n">PIDPressure</span>          <span class="kc">False</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">11</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">45</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">09</span><span class="p">:</span><span class="mi">30</span><span class="p">:</span><span class="mi">32</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">KubeletHasSufficientPID</span>      <span class="n">kubelet</span> <span class="n">has</span> <span class="n">sufficient</span> <span class="n">PID</span> <span class="n">available</span>
+  <span class="n">Ready</span>                <span class="kc">True</span>    <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">11</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">45</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">Tue</span><span class="p">,</span> <span class="mi">07</span> <span class="n">May</span> <span class="mi">2024</span> <span class="mi">11</span><span class="p">:</span><span class="mi">07</span><span class="p">:</span><span class="mi">41</span> <span class="o">+</span><span class="mi">0800</span>   <span class="n">KubeletReady</span>                 <span class="n">kubelet</span> <span class="ow">is</span> <span class="n">posting</span> <span class="n">ready</span> <span class="n">status</span>
+<span class="n">Addresses</span><span class="p">:</span>
+  <span class="n">InternalIP</span><span class="p">:</span>  <span class="mf">192.168.122.21</span>
+  <span class="n">Hostname</span><span class="p">:</span>    <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>
+<span class="n">Capacity</span><span class="p">:</span>
+  <span class="n">cpu</span><span class="p">:</span>                <span class="mi">4</span>
+  <span class="n">ephemeral</span><span class="o">-</span><span class="n">storage</span><span class="p">:</span>  <span class="mi">116588932</span><span class="n">Ki</span>
+  <span class="n">hugepages</span><span class="o">-</span><span class="mi">2</span><span class="n">Mi</span><span class="p">:</span>      <span class="mi">0</span>
+  <span class="n">memory</span><span class="p">:</span>             <span class="mi">8045432</span><span class="n">Ki</span>
+  <span class="n">pods</span><span class="p">:</span>               <span class="mi">110</span>
+<span class="n">Allocatable</span><span class="p">:</span>
+  <span class="n">cpu</span><span class="p">:</span>                <span class="mi">4</span>
+  <span class="n">ephemeral</span><span class="o">-</span><span class="n">storage</span><span class="p">:</span>  <span class="mi">107448359554</span>
+  <span class="n">hugepages</span><span class="o">-</span><span class="mi">2</span><span class="n">Mi</span><span class="p">:</span>      <span class="mi">0</span>
+  <span class="n">memory</span><span class="p">:</span>             <span class="mi">7943032</span><span class="n">Ki</span>
+  <span class="n">pods</span><span class="p">:</span>               <span class="mi">110</span>
+<span class="n">System</span> <span class="n">Info</span><span class="p">:</span>
+  <span class="n">Machine</span> <span class="n">ID</span><span class="p">:</span>                 <span class="n">f3b5de2dfcf249dfa0888601b1f5d8f2</span>
+  <span class="n">System</span> <span class="n">UUID</span><span class="p">:</span>                <span class="n">f3b5de2d</span><span class="o">-</span><span class="n">fcf2</span><span class="o">-</span><span class="mi">49</span><span class="n">df</span><span class="o">-</span><span class="n">a088</span><span class="o">-</span><span class="mi">8601</span><span class="n">b1f5d8f2</span>
+  <span class="n">Boot</span> <span class="n">ID</span><span class="p">:</span>                    <span class="mi">232</span><span class="n">d2b9d</span><span class="o">-</span><span class="mi">5</span><span class="n">f25</span><span class="o">-</span><span class="mi">4374</span><span class="o">-</span><span class="mi">82</span><span class="n">f1</span><span class="o">-</span><span class="n">a96baf5c7a10</span>
+  <span class="n">Kernel</span> <span class="n">Version</span><span class="p">:</span>             <span class="mf">6.7.1</span><span class="o">-</span><span class="mf">1.</span><span class="n">el7</span><span class="o">.</span><span class="n">elrepo</span><span class="o">.</span><span class="n">x86_64</span>
+  <span class="n">OS</span> <span class="n">Image</span><span class="p">:</span>                   <span class="n">CentOS</span> <span class="n">Linux</span> <span class="mi">7</span> <span class="p">(</span><span class="n">Core</span><span class="p">)</span>
+  <span class="n">Operating</span> <span class="n">System</span><span class="p">:</span>           <span class="n">linux</span>
+  <span class="n">Architecture</span><span class="p">:</span>               <span class="n">amd64</span>
+  <span class="n">Container</span> <span class="n">Runtime</span> <span class="n">Version</span><span class="p">:</span>  <span class="n">docker</span><span class="p">:</span><span class="o">//</span><span class="mf">20.10.9</span>
+  <span class="n">Kubelet</span> <span class="n">Version</span><span class="p">:</span>            <span class="n">v1</span><span class="mf">.22.6</span>
+  <span class="n">Kube</span><span class="o">-</span><span class="n">Proxy</span> <span class="n">Version</span><span class="p">:</span>         <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="n">PodCIDR</span><span class="p">:</span>                      <span class="mf">10.244.0.0</span><span class="o">/</span><span class="mi">24</span>
+<span class="n">PodCIDRs</span><span class="p">:</span>                     <span class="mf">10.244.0.0</span><span class="o">/</span><span class="mi">24</span>
+<span class="n">Non</span><span class="o">-</span><span class="n">terminated</span> <span class="n">Pods</span><span class="p">:</span>          <span class="p">(</span><span class="mi">9</span> <span class="ow">in</span> <span class="n">total</span><span class="p">)</span>
+  <span class="n">Namespace</span>                   <span class="n">Name</span>                                        <span class="n">CPU</span> <span class="n">Requests</span>  <span class="n">CPU</span> <span class="n">Limits</span>  <span class="n">Memory</span> <span class="n">Requests</span>  <span class="n">Memory</span> <span class="n">Limits</span>  <span class="n">Age</span>
+  <span class="o">---------</span>                   <span class="o">----</span>                                        <span class="o">------------</span>  <span class="o">----------</span>  <span class="o">---------------</span>  <span class="o">-------------</span>  <span class="o">---</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">calico</span><span class="o">-</span><span class="n">kube</span><span class="o">-</span><span class="n">controllers</span><span class="o">-</span><span class="mi">5</span><span class="n">b68c4d876</span><span class="o">-</span><span class="n">cqcz7</span>    <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>        <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>           <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>         <span class="mi">124</span><span class="n">m</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">calico</span><span class="o">-</span><span class="n">node</span><span class="o">-</span><span class="mi">7</span><span class="n">hg8t</span>                           <span class="mi">250</span><span class="n">m</span> <span class="p">(</span><span class="mi">6</span><span class="o">%</span><span class="p">)</span>     <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>           <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>         <span class="mi">124</span><span class="n">m</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">coredns</span><span class="o">-</span><span class="mi">7</span><span class="n">d89d9b6b8</span><span class="o">-</span><span class="n">lx4jr</span>                    <span class="mi">100</span><span class="n">m</span> <span class="p">(</span><span class="mi">2</span><span class="o">%</span><span class="p">)</span>     <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">70</span><span class="n">Mi</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>        <span class="mi">170</span><span class="n">Mi</span> <span class="p">(</span><span class="mi">2</span><span class="o">%</span><span class="p">)</span>     <span class="mi">126</span><span class="n">m</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">coredns</span><span class="o">-</span><span class="mi">7</span><span class="n">d89d9b6b8</span><span class="o">-</span><span class="n">rbpr5</span>                    <span class="mi">100</span><span class="n">m</span> <span class="p">(</span><span class="mi">2</span><span class="o">%</span><span class="p">)</span>     <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">70</span><span class="n">Mi</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>        <span class="mi">170</span><span class="n">Mi</span> <span class="p">(</span><span class="mi">2</span><span class="o">%</span><span class="p">)</span>     <span class="mi">126</span><span class="n">m</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">etcd</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>                          <span class="mi">100</span><span class="n">m</span> <span class="p">(</span><span class="mi">2</span><span class="o">%</span><span class="p">)</span>     <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">100</span><span class="n">Mi</span> <span class="p">(</span><span class="mi">1</span><span class="o">%</span><span class="p">)</span>       <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>         <span class="mi">126</span><span class="n">m</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">kube</span><span class="o">-</span><span class="n">apiserver</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>                <span class="mi">250</span><span class="n">m</span> <span class="p">(</span><span class="mi">6</span><span class="o">%</span><span class="p">)</span>     <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>           <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>         <span class="mi">126</span><span class="n">m</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">kube</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">manager</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>       <span class="mi">200</span><span class="n">m</span> <span class="p">(</span><span class="mi">5</span><span class="o">%</span><span class="p">)</span>     <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>           <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>         <span class="mi">126</span><span class="n">m</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">kube</span><span class="o">-</span><span class="n">proxy</span><span class="o">-</span><span class="n">pfnps</span>                            <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>        <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>           <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>         <span class="mi">117</span><span class="n">m</span>
+  <span class="n">kube</span><span class="o">-</span><span class="n">system</span>                 <span class="n">kube</span><span class="o">-</span><span class="n">scheduler</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>                <span class="mi">100</span><span class="n">m</span> <span class="p">(</span><span class="mi">2</span><span class="o">%</span><span class="p">)</span>     <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>      <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>           <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>         <span class="mi">29</span><span class="n">m</span>
+<span class="n">Allocated</span> <span class="n">resources</span><span class="p">:</span>
+  <span class="p">(</span><span class="n">Total</span> <span class="n">limits</span> <span class="n">may</span> <span class="n">be</span> <span class="n">over</span> <span class="mi">100</span> <span class="n">percent</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span><span class="p">,</span> <span class="n">overcommitted</span><span class="o">.</span><span class="p">)</span>
+  <span class="n">Resource</span>           <span class="n">Requests</span>     <span class="n">Limits</span>
+  <span class="o">--------</span>           <span class="o">--------</span>     <span class="o">------</span>
+  <span class="n">cpu</span>                <span class="mi">1100</span><span class="n">m</span> <span class="p">(</span><span class="mi">27</span><span class="o">%</span><span class="p">)</span>  <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+  <span class="n">memory</span>             <span class="mi">240</span><span class="n">Mi</span> <span class="p">(</span><span class="mi">3</span><span class="o">%</span><span class="p">)</span>   <span class="mi">340</span><span class="n">Mi</span> <span class="p">(</span><span class="mi">4</span><span class="o">%</span><span class="p">)</span>
+  <span class="n">ephemeral</span><span class="o">-</span><span class="n">storage</span>  <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>       <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+  <span class="n">hugepages</span><span class="o">-</span><span class="mi">2</span><span class="n">Mi</span>      <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>       <span class="mi">0</span> <span class="p">(</span><span class="mi">0</span><span class="o">%</span><span class="p">)</span>
+<span class="n">Events</span><span class="p">:</span>
+  <span class="n">Type</span>    <span class="n">Reason</span>                   <span class="n">Age</span>   <span class="n">From</span>     <span class="n">Message</span>
+  <span class="o">----</span>    <span class="o">------</span>                   <span class="o">----</span>  <span class="o">----</span>     <span class="o">-------</span>
+  <span class="n">Normal</span>  <span class="n">Starting</span>                 <span class="mi">32</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Starting</span> <span class="n">kubelet</span><span class="o">.</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasSufficientMemory</span>  <span class="mi">32</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasSufficientMemory</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasNoDiskPressure</span>    <span class="mi">32</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasNoDiskPressure</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasSufficientPID</span>     <span class="mi">32</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasSufficientPID</span>
+  <span class="n">Normal</span>  <span class="n">NodeNotReady</span>             <span class="mi">32</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeNotReady</span>
+  <span class="n">Normal</span>  <span class="n">NodeAllocatableEnforced</span>  <span class="mi">32</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Updated</span> <span class="n">Node</span> <span class="n">Allocatable</span> <span class="n">limit</span> <span class="n">across</span> <span class="n">pods</span>
+  <span class="n">Normal</span>  <span class="n">NodeReady</span>                <span class="mi">32</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeReady</span>
+  <span class="n">Normal</span>  <span class="n">Starting</span>                 <span class="mi">30</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Starting</span> <span class="n">kubelet</span><span class="o">.</span>
+  <span class="n">Normal</span>  <span class="n">NodeReady</span>                <span class="mi">30</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeReady</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasNoDiskPressure</span>    <span class="mi">30</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasNoDiskPressure</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasSufficientMemory</span>  <span class="mi">30</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasSufficientMemory</span>
+  <span class="n">Normal</span>  <span class="n">NodeNotReady</span>             <span class="mi">30</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeNotReady</span>
+  <span class="n">Normal</span>  <span class="n">NodeAllocatableEnforced</span>  <span class="mi">30</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Updated</span> <span class="n">Node</span> <span class="n">Allocatable</span> <span class="n">limit</span> <span class="n">across</span> <span class="n">pods</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasSufficientPID</span>     <span class="mi">30</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasSufficientPID</span>
+  <span class="n">Normal</span>  <span class="n">Starting</span>                 <span class="mi">29</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Starting</span> <span class="n">kubelet</span><span class="o">.</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasSufficientMemory</span>  <span class="mi">29</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasSufficientMemory</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasNoDiskPressure</span>    <span class="mi">29</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasNoDiskPressure</span>
+  <span class="n">Normal</span>  <span class="n">NodeHasSufficientPID</span>     <span class="mi">29</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeHasSufficientPID</span>
+  <span class="n">Normal</span>  <span class="n">NodeNotReady</span>             <span class="mi">29</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeNotReady</span>
+  <span class="n">Normal</span>  <span class="n">NodeAllocatableEnforced</span>  <span class="mi">29</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Updated</span> <span class="n">Node</span> <span class="n">Allocatable</span> <span class="n">limit</span> <span class="n">across</span> <span class="n">pods</span>
+  <span class="n">Normal</span>  <span class="n">NodeReady</span>                <span class="mi">29</span><span class="n">m</span>   <span class="n">kubelet</span>  <span class="n">Node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">status</span> <span class="ow">is</span> <span class="n">now</span><span class="p">:</span> <span class="n">NodeReady</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id16">
+<h3>节点标签<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<section id="id17">
+<h4>查看节点标签信息<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get nodes --show-labels </span>
+<span class="n">NAME</span>            <span class="n">STATUS</span>   <span class="n">ROLES</span>                  <span class="n">AGE</span>    <span class="n">VERSION</span>   <span class="n">LABELS</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="p">,</span><span class="n">master</span>   <span class="mi">130</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">control</span><span class="o">-</span><span class="n">plane</span><span class="o">=</span><span class="p">,</span><span class="n">node</span><span class="o">-</span><span class="n">role</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">master</span><span class="o">=</span><span class="p">,</span><span class="n">node</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">exclude</span><span class="o">-</span><span class="n">from</span><span class="o">-</span><span class="n">external</span><span class="o">-</span><span class="n">load</span><span class="o">-</span><span class="n">balancers</span><span class="o">=</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">127</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">126</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>                 <span class="mi">126</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>   <span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">beta</span><span class="o">.</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">arch</span><span class="o">=</span><span class="n">amd64</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">hostname</span><span class="o">=</span><span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span><span class="p">,</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">os</span><span class="o">=</span><span class="n">linux</span>
+</pre></div>
+</div>
+</section>
+<section id="id18">
+<h4>设置节点标签<a class="headerlink" href="#id18" title="Link to this heading"></a></h4>
+<p>为k8s-worker-01节点打一个区域标签 region=beijing</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  label node k8s-worker-01 region=beijing</span>
+</pre></div>
+</div>
+</section>
+<section id="id19">
+<h4>通过标签过滤节点<a class="headerlink" href="#id19" title="Link to this heading"></a></h4>
+<p>使用 <code class="docutils literal notranslate"><span class="pre">-l</span></code> 过滤相关标签的节点，如果标签由多个，用逗号分割</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get nodes -l region</span>
+<span class="n">NAME</span>            <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>    <span class="n">VERSION</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">132</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get nodes -l region,zone</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get nodes -l region=beijing</span>
+<span class="n">NAME</span>            <span class="n">STATUS</span>   <span class="n">ROLES</span>    <span class="n">AGE</span>    <span class="n">VERSION</span>
+<span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="n">Ready</span>    <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>   <span class="mi">132</span><span class="n">m</span>   <span class="n">v1</span><span class="mf">.22.6</span>
+</pre></div>
+</div>
+</section>
+<section id="id20">
+<h4>修改标签<a class="headerlink" href="#id20" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span>  <span class="n">label</span> <span class="n">node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span> <span class="n">zone</span><span class="o">=</span><span class="n">cn</span><span class="o">--</span><span class="n">overwrite</span>
+</pre></div>
+</div>
+</section>
+<section id="id21">
+<h4>删除标签<a class="headerlink" href="#id21" title="Link to this heading"></a></h4>
+<p>去除region标签</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">]</span><span class="c1"># kubectl  label node k8s-worker-01 region-</span>
+</pre></div>
+</div>
+</section>
+<section id="id22">
+<h4>标签选择器<a class="headerlink" href="#id22" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>等值关系</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">=</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">!=</span></code></p></li>
+</ul>
+</li>
+<li><p>集合关系</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">key</span> <span class="pre">in</span> <span class="pre">（value1，value2，...）</span></code></p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get nodes -l &#39;region in (shanghai,beijing)&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id23">
+<h2>kubernetes核心概念<a class="headerlink" href="#id23" title="Link to this heading"></a></h2>
+<section id="pod">
+<h3>Pod<a class="headerlink" href="#pod" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/</span></code></p>
+</div></blockquote>
+<p>Pod 是可以在 Kubernetes 中创建和管理的、最小的可部署的计算单元。 Pod（就像在鲸鱼荚或者豌豆荚中）是一组（一个或多个） 容器； 这些容器共享底层网络、存储、以及怎样运行这些容器的声明。</p>
+<p>Kubernetes 集群中的 Pod 主要有两种用法：</p>
+<ul class="simple">
+<li><p>运行单个容器的 Pod</p></li>
+<li><p>运行多个协同工作的容器的 Pod</p></li>
+</ul>
+<p><strong>静态Pod(Static Pod)</strong> 直接由特定节点上的 kubelet 守护进程管理， 不需要 API 服务器看到它们。 尽管大多数 Pod 都是通过控制面（例如，Deployment） 来管理的，对于静态 Pod 而言，kubelet 直接监控每个 Pod,例如kubeadm安装得k8s集群中运行得kube-apiserver、kube-scheduler等控制平面组件都是静态Pod，Kubelet通过监控<code class="docutils literal notranslate"><span class="pre">/etc/kubernetes/manifests/</span></code>目录下的文件，对这些静态Pod镜像管理。</p>
+</section>
+<section id="controller">
+<h3>Controller<a class="headerlink" href="#controller" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/architecture/controller/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/architecture/controller/</span></code></p>
+</div></blockquote>
+<p>控制器 Controller 是在 Kubernetes 上运行的应用程序。</p>
+<p>为了减轻用户的使用负担，通常不需要用户直接管理每个 Pod。 而是使用负载资源来替用户管理一组 Pod。 这些负载资源通过配置 控制器 来确保正确类型的、处于运行状态的 Pod 个数是正确的，与用户所指定的状态相一致。</p>
+<p>Kubernetes 提供若干种内置的工作负载资源：</p>
+<ul class="simple">
+<li><p>Deployment和 ReplicaSet （替换原来的资源 ReplicationController）</p>
+<ul>
+<li><p>部署无状态应用</p></li>
+<li><p>所有 Pod 都是相互等价的，并且在需要的时候被替换</p></li>
+<li><p>管理Pod和ReplicaSet</p></li>
+<li><p>支持部署、滚动升级</p></li>
+</ul>
+</li>
+<li><p>StatefulSet</p>
+<ul>
+<li><p>部署有应用状态的 Pod</p></li>
+<li><p>每个Pod独立运行，须保持Pod启动的顺序和唯一性，有唯一的网络表示、持久存储；有序部署</p></li>
+</ul>
+</li>
+<li><p>DaemonSet</p>
+<ul>
+<li><p>部署守护进程。常用于作为网络链接的辅助工具或者作为网络 插件 的一部分</p></li>
+<li><p>日志采集、监控等其它管理应用</p></li>
+</ul>
+</li>
+<li><p>Job</p>
+<ul>
+<li><p>一次性任务即只执行一次，保障批处理人的得一个或者多个Pod成功结束</p></li>
+</ul>
+</li>
+<li><p>CronJob</p>
+<ul>
+<li><p>周期性定时任务,根据某个排期表来多次运行同一个 Job</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="label">
+<h3>Label<a class="headerlink" href="#label" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/overview/working-with-objects/labels/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/overview/working-with-objects/labels/</span></code></p>
+</div></blockquote>
+<p>Label 是附着到 kubernetes 资源对象上的键值对，可以在创建对象得时候指定，也可以在对象创建后再绑定。给资源定义一个Label相当于对他打了一个标签，后面我们可以通过标签选择器 Label Selector 查询或者筛选这些资源对象，Kubernetes通过这种方式实现了类似SQL得简单又通用得查询机制。</p>
+<p>下面是一些常用得标签：</p>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>标签</th>
+<th>实例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>版本标签</td>
+<td>"release": "stable" <br>"release": "canary"</td>
+</tr>
+<tr>
+<td>环境标签</td>
+<td>"environment": "dev" <br>"environment": "prod"</td>
+</tr>
+<tr>
+<td>架构标签</td>
+<td>"tier": "frontend" <br>"tier": "middleware"</td>
+</tr>
+<tr>
+<td>分区标签</td>
+<td>"partition": "customerA" <br> "partition": "customerB"</td>
+</tr>
+<tr>
+<td>质量管控标签</td>
+<td>"track": "daily"<br>"track": "weekly"</td>
+</tr>
+</tbody>
+</table></section>
+<section id="label-selector">
+<h3>Label Selector<a class="headerlink" href="#label-selector" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/common-definitions/label-selector/">官网</a> ： <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/common-definitions/label-selector/</span></code></p>
+</div></blockquote>
+<p>通过标签选择器，客户端/用户可以指定一个资源对象集合，通过label selector对资源对象集合进行操作</p>
+<p>Label Selector 有两种类型，可以通过都好分割多个表达式：</p>
+<ul class="simple">
+<li><p>基于等式(equality-base)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">=</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">==</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">！=</span></code></p></li>
+</ul>
+</li>
+<li><p>基于集合(set-based)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">in</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">noint</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">!key</span></code>: 表示没有此key</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="service">
+<h3>Service<a class="headerlink" href="#service" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/service/">官网</a> :<code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/services-networking/service/</span></code></p>
+</div></blockquote>
+<p>kubernetes 中 Service 是 将运行在一个或一组 Pod 上的网络应用程序公开为网络服务的方法。</p>
+<p>当一个Pod被意外终止后，自动恢复，其IP或发生变化，为了给用户/客户端提供一个固定得访问入口，Kubernetes 提供了Service资源对象，他是一组Iptables或IPVS规则，用来给用户提供一个固定得访问入口。</p>
+</section>
+<section id="endpoints">
+<h3>Endpoints<a class="headerlink" href="#endpoints" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/service-resources/endpoints-v1/">官网</a> ： <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/service-resources/endpoints-v1/</span></code></p>
+</div></blockquote>
+<p>Service 通过Label筛选出符合条件得Pod集合，但是他并不会直接管理这些Pod IP，而是通过Endpoints管理，当后端Pod被创建或者销毁时，endpoints列表会更新Pod对应的IP地址，一边Service访问请求确保被正常响应</p>
+</section>
+<section id="dns">
+<h3>DNS<a class="headerlink" href="#dns" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/services-networking/dns-pod-service/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/services-networking/dns-pod-service/</span></code></p>
+</div></blockquote>
+<p>为Kubernetes集群内的资源对象提供名称解析，这样就可以通过DNS名称来访问服务</p>
+<ul class="simple">
+<li><p>实现集群内Service名称解析</p></li>
+<li><p>实现集群内Pod内容器中应用访问互联网，提供域名解析</p></li>
+</ul>
+</section>
+</section>
+<section id="id24">
+<h2>kubernetes工作负载<a class="headerlink" href="#id24" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/workloads/">官网</a>: <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/workloads/</span></code></p>
+</div></blockquote>
+<section id="id25">
+<h3>Pod<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<section id="id26">
+<h4>Pod定义<a class="headerlink" href="#id26" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>Pod 是 Kubernetes集群管理(创建、部署)与调度得最小计算单元，表示处于运行状态得一组容器</p></li>
+<li><p>Pod不是京城，而是容器得运行环境</p></li>
+<li><p>Pod内多个容器共享网络、存储、IPC命名空间</p></li>
+<li><p>Pod的IP不是固定的，集群外不能直接访问</p></li>
+</ul>
+</section>
+<section id="id27">
+<h4>Pod分类<a class="headerlink" href="#id27" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>静态Pod：也叫自主式Pod，有kubelet守护进程直接管理</p></li>
+<li><p>控制器管理的Pod： 控制器可以控制Pod的副本数、包括其扩容与裁剪，版本更新或回滚等</p></li>
+</ul>
+</section>
+<section id="id28">
+<h4>Pod管理<a class="headerlink" href="#id28" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>创建</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  run nginx --image=nginx:1.20</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  run nginx --image=nginx:1.20 --dry-run=client -o yaml </span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">creationTimestamp</span><span class="p">:</span> <span class="n">null</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">resources</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="n">dnsPolicy</span><span class="p">:</span> <span class="n">ClusterFirst</span>
+  <span class="n">restartPolicy</span><span class="p">:</span> <span class="n">Always</span>
+<span class="n">status</span><span class="p">:</span> <span class="p">{}</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>删除</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  delete pod nginx</span>
+</pre></div>
+</div>
+</section>
+<section id="id29">
+<h4>镜像的下载策略<a class="headerlink" href="#id29" title="Link to this heading"></a></h4>
+<p>镜像的拉取测率由imagePullPolicy参数控制</p>
+<ul class="simple">
+<li><p>Always：总是拉取</p>
+<ul>
+<li><p>当镜像的版本是latest是，默认策略为Always</p></li>
+</ul>
+</li>
+<li><p>Never：从来不从仓库中下载，本地由就正常启动，没有就启动失败</p></li>
+<li><p>IfNotPresent：如果本地不存在就下载，存在则直接使用</p>
+<ul>
+<li><p>如果指定特定版本，默认策略为IfnotPresent</p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">creationTimestamp</span><span class="p">:</span> <span class="n">null</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span>
+    <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+</pre></div>
+</div>
+</section>
+<section id="id30">
+<h4>资源限制<a class="headerlink" href="#id30" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span> 
+  <span class="n">name</span><span class="p">:</span> <span class="n">pod</span><span class="o">-</span><span class="n">stress</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">stress</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">stress</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">polinux</span><span class="o">/</span><span class="n">stress</span>
+    <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+    <span class="n">command</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span>
+    <span class="n">args</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--vm&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;--vm-bytes&quot;</span><span class="p">,</span> <span class="s2">&quot;150M&quot;</span><span class="p">,</span> <span class="s2">&quot;--vm-hang&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]</span> <span class="c1"># 产生一个进程分配150M内存，1秒后释放</span>
+    <span class="n">resources</span><span class="p">:</span>
+      <span class="n">limits</span><span class="p">:</span>
+        <span class="n">memory</span><span class="p">:</span> <span class="s2">&quot;200Mi&quot;</span>
+      <span class="n">requests</span><span class="p">:</span>
+        <span class="n">memory</span><span class="p">:</span> <span class="s2">&quot;100Mi&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="id31">
+<h4>重启策略<a class="headerlink" href="#id31" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span> 
+  <span class="n">name</span><span class="p">:</span> <span class="n">pod</span><span class="o">-</span><span class="n">stress</span><span class="o">-</span><span class="mi">2</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">stress</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">stress</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">polinux</span><span class="o">/</span><span class="n">stress</span>
+    <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+    <span class="n">command</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span>
+    <span class="n">args</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--vm&quot;</span><span class="p">,</span> <span class="s2">&quot;30&quot;</span><span class="p">,</span> <span class="s2">&quot;--vm-bytes&quot;</span><span class="p">,</span> <span class="s2">&quot;250M&quot;</span><span class="p">,</span> <span class="s2">&quot;--vm-hang&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]</span>
+    <span class="n">resources</span><span class="p">:</span>
+      <span class="n">limits</span><span class="p">:</span>
+        <span class="n">memory</span><span class="p">:</span> <span class="s2">&quot;200Mi&quot;</span>
+      <span class="n">requests</span><span class="p">:</span>
+        <span class="n">memory</span><span class="p">:</span> <span class="s2">&quot;100Mi&quot;</span>
+  <span class="n">restartPolicy</span><span class="p">:</span> <span class="n">Never</span>
+</pre></div>
+</div>
+</section>
+<section id="id32">
+<h4>多容器Pod<a class="headerlink" href="#id32" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span> 
+  <span class="n">name</span><span class="p">:</span> <span class="n">pod</span><span class="o">-</span><span class="n">stress</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">stress</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">stress1</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">polinux</span><span class="o">/</span><span class="n">stress</span>
+    <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+    <span class="n">command</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span>
+    <span class="n">args</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--vm&quot;</span><span class="p">,</span> <span class="s2">&quot;30&quot;</span><span class="p">,</span> <span class="s2">&quot;--vm-bytes&quot;</span><span class="p">,</span> <span class="s2">&quot;250M&quot;</span><span class="p">,</span> <span class="s2">&quot;--vm-hang&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]</span>
+    <span class="n">resources</span><span class="p">:</span>
+      <span class="n">limits</span><span class="p">:</span>
+        <span class="n">memory</span><span class="p">:</span> <span class="s2">&quot;200Mi&quot;</span>
+      <span class="n">requests</span><span class="p">:</span>
+        <span class="n">memory</span><span class="p">:</span> <span class="s2">&quot;100Mi&quot;</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">stress2</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">polinux</span><span class="o">/</span><span class="n">stress</span>
+    <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+    <span class="n">command</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;stress&quot;</span><span class="p">]</span>
+    <span class="n">args</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--vm&quot;</span><span class="p">,</span> <span class="s2">&quot;30&quot;</span><span class="p">,</span> <span class="s2">&quot;--vm-bytes&quot;</span><span class="p">,</span> <span class="s2">&quot;250M&quot;</span><span class="p">,</span> <span class="s2">&quot;--vm-hang&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]</span>
+    <span class="n">resources</span><span class="p">:</span>
+      <span class="n">limits</span><span class="p">:</span>
+        <span class="n">memory</span><span class="p">:</span> <span class="s2">&quot;200Mi&quot;</span>
+      <span class="n">requests</span><span class="p">:</span>
+        <span class="n">memory</span><span class="p">:</span> <span class="s2">&quot;100Mi&quot;</span>
+  <span class="n">restartPolicy</span><span class="p">:</span> <span class="n">Never</span>
+</pre></div>
+</div>
+</section>
+<section id="id33">
+<h4>Pod的调度<a class="headerlink" href="#id33" title="Link to this heading"></a></h4>
+<p><img alt="../_images/pod1.png" src="../_images/pod1.png" /></p>
+<ul class="simple">
+<li><p>用户通过 kubectl命令向 api-server 发送创建Pod请求</p></li>
+<li><p>api server接收到pod创建请求后，生成资源清单文件，并将资源清单信息写入etcd数据库中</p></li>
+<li><p>scheduler调度器启动后，一直watch API server，获取 podSpec和NodeSpec为空的Pod，即判断 pods.spec.Node == null?,如果为null则是一个新Pod创建请求，需要调度</p></li>
+<li><p>调度器进行预选、优选计算，选择合适的节点进行调度，</p>
+<ul>
+<li><p>1.过滤不满足条件的</p></li>
+<li><p>2.挑选优先级高的</p></li>
+</ul>
+</li>
+<li><p>kubeclt 通过watch etcd数据库，发现有新的Pod调度过来，则调用Runc创建容器，并将创建结果返回给 API Server用于更新etcd数据库</p></li>
+</ul>
+</section>
+<section id="id34">
+<h4>调度的约束方法<a class="headerlink" href="#id34" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/scheduling-eviction/assign-pod-node/">官网</a> ：<code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/scheduling-eviction/assign-pod-node/</span></code></p>
+</div></blockquote>
+<ul class="simple">
+<li><p>通过<strong>nodeName</strong>的方式将Pod运行再指定节点</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span> 
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span><span class="o">-</span><span class="n">nodename</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">nodeName</span><span class="p">:</span> <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span><span class="o">-</span><span class="n">alpine</span>
+    <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>给节点打标签，通过<strong>nodeSelector</strong>指定Pod运行到该节点</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span> 
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span><span class="o">-</span><span class="n">nodeselector</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">nodeSelector</span><span class="p">:</span>
+    <span class="n">disktype</span><span class="p">:</span> <span class="n">ssd</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span><span class="o">-</span><span class="n">alpine</span>
+    <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+
+<span class="n">kubectl</span>  <span class="n">label</span> <span class="n">node</span> <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span> <span class="n">disktype</span><span class="o">=</span><span class="n">ssd</span> 
+</pre></div>
+</div>
+</section>
+<section id="id35">
+<h4>生命周期<a class="headerlink" href="#id35" title="Link to this heading"></a></h4>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/pod-lifecycle/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/pod-lifecycle/</span></code></p>
+</div></blockquote>
+<p><img alt="../_images/pod2.png" src="../_images/pod2.png" /></p>
+<ul class="simple">
+<li><p>Pod中的容器再创建前有初始化容器(InitC)来进行环境初始化</p></li>
+<li><p>环境初始化完成以后主容器(MainC)开始启动</p></li>
+<li><p>主容器启动后会有一个postStart的操作(启动后触发型操作，或者叫启动后钩子)</p></li>
+<li><p>postStart后开始进行健康检查</p>
+<ul>
+<li><p>1.存活性检查</p></li>
+<li><p>2.就绪性检查</p></li>
+</ul>
+</li>
+<li><p>容器结束前会限制性preStop的操作（结束前触发型操作，或者叫结束前后钩子）</p></li>
+<li><p>结束后进行销毁或者重启，这个根据容器启动策略而定</p></li>
+</ul>
+</section>
+<section id="id36">
+<h4>健康检查<a class="headerlink" href="#id36" title="Link to this heading"></a></h4>
+</section>
+<section id="id37">
+<h4>状态及故障排查<a class="headerlink" href="#id37" title="Link to this heading"></a></h4>
+</section>
+</section>
+<section id="id38">
+<h3>Controller<a class="headerlink" href="#id38" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/architecture/controller/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/architecture/controller/</span></code></p>
+</div></blockquote>
+</section>
+<section id="id39">
+<h3>Service<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
+</section>
+</section>
+<section id="id40">
+<h2>自动伸缩<a class="headerlink" href="#id40" title="Link to this heading"></a></h2>
+<section id="hpa">
+<h3>水平自动伸缩HPA<a class="headerlink" href="#hpa" title="Link to this heading"></a></h3>
+<ol class="simple">
+<li><p>前提：部署metrices-server</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># kubectl  top pods</span>
+<span class="n">NAME</span>                    <span class="n">CPU</span><span class="p">(</span><span class="n">cores</span><span class="p">)</span>   <span class="n">MEMORY</span><span class="p">(</span><span class="nb">bytes</span><span class="p">)</span>   
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">h7zv8</span>   <span class="mi">0</span><span class="n">m</span>           <span class="mi">1</span><span class="n">Mi</span>             
+<span class="n">myapp</span><span class="o">-</span><span class="mi">7</span><span class="n">d4b7b84b</span><span class="o">-</span><span class="n">pr49x</span>   <span class="mi">0</span><span class="n">m</span>           <span class="mi">1</span><span class="n">Mi</span>  
+</pre></div>
+</div>
+<ol class="simple">
+<li><p>创建一个deployment应用</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deploy</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span><span class="o">-</span><span class="n">alpine</span>
+        <span class="n">resources</span><span class="p">:</span>
+          <span class="n">requests</span><span class="p">:</span>
+            <span class="n">cpu</span><span class="p">:</span> <span class="mi">200</span><span class="n">m</span>
+            <span class="n">memory</span><span class="p">:</span> <span class="mi">100</span><span class="n">Mi</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span><span class="o">-</span><span class="n">svc</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="nb">type</span><span class="p">:</span> <span class="n">NodePort</span>
+  <span class="n">ports</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">port</span><span class="p">:</span> <span class="mi">80</span>
+    <span class="n">targetPort</span><span class="p">:</span> <span class="mi">80</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+</pre></div>
+</div>
+<p>3.创建HPA对象</p>
+<p>下面是一个HPA对象配置，当CPU超过50%时，HAP将自动增加Pod副本数，副本数量最高不超过10个</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># kubectl autoscale deployment nginx-hpa --min=1 --max=10  --cpu-percent=50 -n test -o yaml --dry-run=client </span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">autoscaling</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">HorizontalPodAutoscaler</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span><span class="o">-</span><span class="n">hpa</span>
+  <span class="n">namespace</span><span class="p">:</span> 
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">maxReplicas</span><span class="p">:</span> <span class="mi">10</span>
+  <span class="n">minReplicas</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="n">scaleTargetRef</span><span class="p">:</span>
+    <span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deploy</span>
+  <span class="n">targetCPUUtilizationPercentage</span><span class="p">:</span> <span class="mi">50</span>
+</pre></div>
+</div>
+<p>4.使用ab命令进行压测，观察结果</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ab</span> <span class="o">-</span><span class="n">c</span> <span class="mi">200</span> <span class="o">-</span><span class="n">n</span> <span class="mi">1000000000</span>  <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="mf">10.101.63.143</span><span class="o">/</span> <span class="c1"># 后面这个 / 必须要加</span>
+
+<span class="n">kubectl</span>  <span class="n">get</span> <span class="n">HorizontalPodAutoscaler</span> <span class="o">-</span><span class="n">n</span> <span class="n">test</span> <span class="o">-</span><span class="n">w</span>
+<span class="n">NAME</span>        <span class="n">REFERENCE</span>                 <span class="n">TARGETS</span>   <span class="n">MINPODS</span>   <span class="n">MAXPODS</span>   <span class="n">REPLICAS</span>   <span class="n">AGE</span>
+<span class="n">nginx</span><span class="o">-</span><span class="n">hpa</span>   <span class="n">Deployment</span><span class="o">/</span><span class="n">nginx</span><span class="o">-</span><span class="n">deploy</span>   <span class="mi">0</span><span class="o">%/</span><span class="mi">50</span><span class="o">%</span>    <span class="mi">1</span>         <span class="mi">10</span>        <span class="mi">2</span>          <span class="mi">92</span><span class="n">s</span>
+
+<span class="n">nginx</span><span class="o">-</span><span class="n">hpa</span>   <span class="n">Deployment</span><span class="o">/</span><span class="n">nginx</span><span class="o">-</span><span class="n">deploy</span>   <span class="mi">55</span><span class="o">%/</span><span class="mi">50</span><span class="o">%</span>   <span class="mi">1</span>         <span class="mi">10</span>        <span class="mi">2</span>          <span class="mi">2</span><span class="n">m45s</span>
+<span class="n">nginx</span><span class="o">-</span><span class="n">hpa</span>   <span class="n">Deployment</span><span class="o">/</span><span class="n">nginx</span><span class="o">-</span><span class="n">deploy</span>   <span class="mi">405</span><span class="o">%/</span><span class="mi">50</span><span class="o">%</span>   <span class="mi">1</span>         <span class="mi">10</span>        <span class="mi">3</span>          <span class="mi">3</span><span class="n">m</span>
+<span class="n">nginx</span><span class="o">-</span><span class="n">hpa</span>   <span class="n">Deployment</span><span class="o">/</span><span class="n">nginx</span><span class="o">-</span><span class="n">deploy</span>   <span class="mi">414</span><span class="o">%/</span><span class="mi">50</span><span class="o">%</span>   <span class="mi">1</span>         <span class="mi">10</span>        <span class="mi">6</span>          <span class="mi">3</span><span class="n">m15s</span>
+<span class="n">nginx</span><span class="o">-</span><span class="n">hpa</span>   <span class="n">Deployment</span><span class="o">/</span><span class="n">nginx</span><span class="o">-</span><span class="n">deploy</span>   <span class="mi">303</span><span class="o">%/</span><span class="mi">50</span><span class="o">%</span>   <span class="mi">1</span>         <span class="mi">10</span>        <span class="mi">10</span>         <span class="mi">3</span><span class="n">m30s</span>
+</pre></div>
+</div>
+</section>
+<section id="vpa">
+<h3>垂直自动伸缩VPA<a class="headerlink" href="#vpa" title="Link to this heading"></a></h3>
 </section>
 </section>
 </section>

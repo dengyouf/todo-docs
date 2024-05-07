@@ -1755,7 +1755,7 @@ kubectl  label node k8s-worker-02 disktype=ssd
 
 ### 水平自动伸缩HPA
 
-1. 前提：部署metrices-server
+1.前提：部署metrices-server
 ```
 # kubectl  top pods
 NAME                    CPU(cores)   MEMORY(bytes)   
@@ -1763,7 +1763,7 @@ myapp-7d4b7b84b-h7zv8   0m           1Mi
 myapp-7d4b7b84b-pr49x   0m           1Mi  
 ```
 
-2. 创建一个deployment应用
+2.创建一个deployment应用
 ``` 
 ---
 apiVersion: apps/v1

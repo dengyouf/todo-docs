@@ -717,17 +717,329 @@ kubeasz]# ./ezctl new k8s-01
 2024-05-07 21:46:39 DEBUG cluster k8s-01: files successfully created.
 2024-05-07 21:46:39 INFO next steps 1: to config '/etc/kubeasz/clusters/k8s-01/hosts'
 2024-05-07 21:46:39 INFO next steps 2: to config '/etc/kubeasz/clusters/k8s-01/config.yml'
-
+```
+```
+# 配置集群
 vim /etc/kubeasz/clusters/k8s-01/config.yml
-# k8s 集群 master 节点证书配置，可以添加多个ip和域名（比如增加公网ip和域名），如果有vip，则vip的地址也要写进去
+cat /etc/kubeasz/clusters/k8s-01/config.yml
+############################
+# prepare
+############################
+# 可选离线安装系统软件包 (offline|online)
+INSTALL_SOURCE: "online"
+
+# 可选进行系统安全加固 github.com/dev-sec/ansible-collection-hardening
+# (deprecated) 未更新上游项目，未验证最新k8s集群安装，不建议启用
+OS_HARDEN: false
+
+
+############################
+# role:deploy
+############################
+# default: ca will expire in 100 years
+# default: certs issued by the ca will expire in 50 years
+CA_EXPIRY: "876000h"
+CERT_EXPIRY: "438000h"
+
+# force to recreate CA and other certs, not suggested to set 'true'
+CHANGE_CA: false
+
+# kubeconfig 配置参数
+CLUSTER_NAME: "cluster1"
+CONTEXT_NAME: "context-{{ CLUSTER_NAME }}"
+
+# k8s version
+K8S_VER: "1.29.0"
+
+# set unique 'k8s_nodename' for each node, if not set(default:'') ip add will be used
+# CAUTION: 'k8s_nodename' must consist of lower case alphanumeric characters, '-' or '.',
+# and must start and end with an alphanumeric character (e.g. 'example.com'),
+# regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+K8S_NODENAME: "{%- if k8s_nodename != '' -%} \
+                    {{ k8s_nodename|replace('_', '-')|lower }} \
+               {%- else -%} \
+                    {{ inventory_hostname }} \
+               {%- endif -%}"
+
+############################
+# role:etcd
+############################
+# 设置不同的wal目录，可以避免磁盘io竞争，提高性能
+ETCD_DATA_DIR: "/var/lib/etcd"
+ETCD_WAL_DIR: ""
+
+
+############################
+# role:runtime [containerd,docker]
+############################
+# [.]启用拉取加速镜像仓库
+ENABLE_MIRROR_REGISTRY: true
+
+# [.]添加信任的私有仓库
+INSECURE_REG:
+  - "http://easzlab.io.local:5000"
+  - "https://{{ HARBOR_REGISTRY }}"
+
+# [.]基础容器镜像
+SANDBOX_IMAGE: "easzlab.io.local:5000/easzlab/pause:3.9"
+
+# [containerd]容器持久化存储目录
+CONTAINERD_STORAGE_DIR: "/var/lib/containerd"
+
+# [docker]容器存储目录
+DOCKER_STORAGE_DIR: "/var/lib/docker"
+
+# [docker]开启Restful API
+DOCKER_ENABLE_REMOTE_API: false
+
+
+############################
+# role:kube-master
+############################
+# k8s 集群 master 节点证书配置，可以添加多个ip和域名（比如增加公网ip和域名）,如果有vip，请把vip也写进去
 MASTER_CERT_HOSTS:
   - "192.168.1.111"
   - "192.168.1.113"
   - "192.168.1.112"
   - "k8s.easzlab.io"
+  #- "www.test.com"
 
+# node 节点上 pod 网段掩码长度（决定每个节点最多能分配的pod ip地址）
+# 如果flannel 使用 --kube-subnet-mgr 参数，那么它将读取该设置为每个节点分配pod网段
+# https://github.com/coreos/flannel/issues/847
+NODE_CIDR_LEN: 24
+
+
+############################
+# role:kube-node
+############################
+# Kubelet 根目录
+KUBELET_ROOT_DIR: "/var/lib/kubelet"
+
+# node节点最大pod 数
+MAX_PODS: 220
+
+# 配置为kube组件（kubelet,kube-proxy,dockerd等）预留的资源量
+# 数值设置详见templates/kubelet-config.yaml.j2
+KUBE_RESERVED_ENABLED: "no"
+
+# k8s 官方不建议草率开启 system-reserved, 除非你基于长期监控，了解系统的资源占用状况；
+# 并且随着系统运行时间，需要适当增加资源预留，数值设置详见templates/kubelet-config.yaml.j2
+# 系统预留设置基于 4c/8g 虚机，最小化安装系统服务，如果使用高性能物理机可以适当增加预留
+# 另外，集群安装时候apiserver等资源占用会短时较大，建议至少预留1g内存
+SYS_RESERVED_ENABLED: "no"
+
+
+############################
+# role:network [flannel,calico,cilium,kube-ovn,kube-router]
+############################
+# ------------------------------------------- flannel
+# [flannel]设置flannel 后端"host-gw","vxlan"等
+FLANNEL_BACKEND: "vxlan"
+DIRECT_ROUTING: false
+
+# [flannel]
+flannel_ver: "v0.22.2"
+
+# ------------------------------------------- calico
+# [calico] IPIP隧道模式可选项有: [Always, CrossSubnet, Never],跨子网可以配置为Always与CrossSubnet(公有云建议使用always比较省事，其他的话需要修改各自公有云的网络配置，具体可以参考各个公有云说明)
+# 其次CrossSubnet为隧道+BGP路由混合模式可以提升网络性能，同子网配置为Never即可.
+CALICO_IPV4POOL_IPIP: "Always"
+
+# [calico]设置 calico-node使用的host IP，bgp邻居通过该地址建立，可手工指定也可以自动发现
+IP_AUTODETECTION_METHOD: "can-reach={{ groups['kube_master'][0] }}"
+
+# [calico]设置calico 网络 backend: bird, vxlan, none
+CALICO_NETWORKING_BACKEND: "bird"
+
+# [calico]设置calico 是否使用route reflectors
+# 如果集群规模超过50个节点，建议启用该特性
+CALICO_RR_ENABLED: false
+
+# CALICO_RR_NODES 配置route reflectors的节点，如果未设置默认使用集群master节点
+# CALICO_RR_NODES: ["192.168.1.1", "192.168.1.2"]
+CALICO_RR_NODES: []
+
+# [calico]更新支持calico 版本: ["3.19", "3.23"]
+calico_ver: "v3.26.4"
+
+# [calico]calico 主版本
+calico_ver_main: "{{ calico_ver.split('.')[0] }}.{{ calico_ver.split('.')[1] }}"
+
+# ------------------------------------------- cilium
+# [cilium]镜像版本
+cilium_ver: "1.14.5"
+cilium_connectivity_check: true
+cilium_hubble_enabled: false
+cilium_hubble_ui_enabled: false
+
+# ------------------------------------------- kube-ovn
+# [kube-ovn]离线镜像tar包
+kube_ovn_ver: "v1.11.5"
+
+# ------------------------------------------- kube-router
+# [kube-router]公有云上存在限制，一般需要始终开启 ipinip；自有环境可以设置为 "subnet"
+OVERLAY_TYPE: "full"
+
+# [kube-router]NetworkPolicy 支持开关
+FIREWALL_ENABLE: true
+
+# [kube-router]kube-router 镜像版本
+kube_router_ver: "v1.5.4"
+
+
+############################
+# role:cluster-addon
+############################
+# coredns 自动安装
+dns_install: "yes"
+corednsVer: "1.11.1"
+ENABLE_LOCAL_DNS_CACHE: true
+dnsNodeCacheVer: "1.22.23"
+# 设置 local dns cache 地址
+LOCAL_DNS_CACHE: "169.254.20.10"
+
+# metric server 自动安装
+metricsserver_install: "yes"
+metricsVer: "v0.6.4"
+
+# dashboard 自动安装
+dashboard_install: "yes"
+dashboardVer: "v2.7.0"
+dashboardMetricsScraperVer: "v1.0.8"
+
+# prometheus 自动安装
+prom_install: "no"
+prom_namespace: "monitor"
+prom_chart_ver: "45.23.0"
+
+# kubeapps 自动安装，如果选择安装，默认同时安装local-storage（提供storageClass: "local-path"）
+kubeapps_install: "no"
+kubeapps_install_namespace: "kubeapps"
+kubeapps_working_namespace: "default"
+kubeapps_storage_class: "local-path"
+kubeapps_chart_ver: "12.4.3"
+
+# local-storage (local-path-provisioner) 自动安装
+local_path_provisioner_install: "no"
+local_path_provisioner_ver: "v0.0.24"
+# 设置默认本地存储路径
+local_path_provisioner_dir: "/opt/local-path-provisioner"
+
+# nfs-provisioner 自动安装
+nfs_provisioner_install: "no"
+nfs_provisioner_namespace: "kube-system"
+nfs_provisioner_ver: "v4.0.2"
+nfs_storage_class: "managed-nfs-storage"
+nfs_server: "192.168.1.10"
+nfs_path: "/data/nfs"
+
+# network-check 自动安装
+network_check_enabled: false
+network_check_schedule: "*/5 * * * *"
+
+############################
+# role:harbor
+############################
+# harbor version，完整版本号
+HARBOR_VER: "v2.8.4"
+HARBOR_DOMAIN: "harbor.easzlab.io.local"
+HARBOR_PATH: /var/data
+HARBOR_TLS_PORT: 8443
+HARBOR_REGISTRY: "{{ HARBOR_DOMAIN }}:{{ HARBOR_TLS_PORT }}"
+
+# if set 'false', you need to put certs named harbor.pem and harbor-key.pem in directory 'down'
+HARBOR_SELF_SIGNED_CERT: true
+
+# install extra component
+HARBOR_WITH_NOTARY: false
+HARBOR_WITH_TRIVY: false
+```
+```
 # 规划集群
 vim /etc/kubeasz/clusters/k8s-01/hosts
+cat /etc/kubeasz/clusters/k8s-01/hosts
+# 'etcd' cluster should have odd member(s) (1,3,5,...)
+[etcd]
+192.168.1.111
+192.168.1.112
+192.168.1.113
+
+# master node(s), set unique 'k8s_nodename' for each node
+# CAUTION: 'k8s_nodename' must consist of lower case alphanumeric characters, '-' or '.',
+# and must start and end with an alphanumeric character
+[kube_master]
+192.168.1.111 k8s_nodename='k8s-master-01'
+192.168.1.112 k8s_nodename='k8s-master-02'
+192.168.1.113 k8s_nodename='k8s-master-03'
+
+# work node(s), set unique 'k8s_nodename' for each node
+# CAUTION: 'k8s_nodename' must consist of lower case alphanumeric characters, '-' or '.',
+# and must start and end with an alphanumeric character
+[kube_node]
+192.168.1.221 k8s_nodename='k8s-worker-01'
+192.168.1.222 k8s_nodename='k8s-worker-02'
+192.168.1.223 k8s_nodename='k8s-worker-03'
+
+# [optional] harbor server, a private docker registry
+# 'NEW_INSTALL': 'true' to install a harbor server; 'false' to integrate with existed one
+[harbor]
+#192.168.1.8 NEW_INSTALL=false
+
+# [optional] loadbalance for accessing k8s from outside
+[ex_lb]
+#192.168.1.6 LB_ROLE=backup EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
+#192.168.1.7 LB_ROLE=master EX_APISERVER_VIP=192.168.1.250 EX_APISERVER_PORT=8443
+
+# [optional] ntp server for the cluster
+[chrony]
+#192.168.1.1
+
+[all:vars]
+# --------- Main Variables ---------------
+# Secure port for apiservers
+SECURE_PORT="6443"
+
+# Cluster container-runtime supported: docker, containerd
+# if k8s version >= 1.24, docker is not supported
+CONTAINER_RUNTIME="containerd"
+
+# Network plugins supported: calico, flannel, kube-router, cilium, kube-ovn
+CLUSTER_NETWORK="calico"
+
+# Service proxy mode of kube-proxy: 'iptables' or 'ipvs'
+PROXY_MODE="ipvs"
+
+# K8S Service CIDR, not overlap with node(host) networking
+SERVICE_CIDR="10.68.0.0/16"
+
+# Cluster CIDR (Pod CIDR), not overlap with node(host) networking
+CLUSTER_CIDR="172.20.0.0/16"
+
+# NodePort Range
+NODE_PORT_RANGE="30000-32767"
+
+# Cluster DNS Domain
+CLUSTER_DNS_DOMAIN="cluster.local"
+
+# -------- Additional Variables (don't change the default value right now) ---
+# Binaries Directory
+bin_dir="/opt/kube/bin"
+
+# Deploy Directory (kubeasz workspace)
+base_dir="/etc/kubeasz"
+
+# Directory for a specific cluster
+cluster_dir="{{ base_dir }}/clusters/k8s-01"
+
+# CA and other components cert/key Directory
+ca_dir="/etc/kubernetes/ssl"
+
+# Default 'k8s_nodename' is empty
+k8s_nodename=''
+
+# Default python interpreter
+ansible_python_interpreter=/usr/bin/python3
 ```
 
 #### 使用ezctl工具部署K8s集群

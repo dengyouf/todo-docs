@@ -548,6 +548,317 @@ myapp-7d4b7b84b-pr49x   0m           1Mi
 ```
 [](../images/dashboard2.png)
 
+### 基于kubeasz快速部署高可用的v1.29.2集群
+
+> [官网](https://github.com/easzlab/kubeasz) : `https://github.com/easzlab/kubeasz`
+
+使用 kubeasz 快速部署Kubernetes集群。操作系统为CentOS 7.6.1810 X86_64，用到的各相关程序版本如下：
+- kubernetes: v1.29.2
+- etcd: v3.5.12
+- calico: v3.26.4
+
+| 主机IP          | 角色                        | 配置        |
+|---------------|---------------------------|-----------|
+| 192.168.1.111 | master<br>kubeasz<br>etcd | 4c8g/200G |
+| 192.168.1.112 | master<br>etcd            | 4c8g/200G |
+| 192.168.1.113 | master<br>etcd            | 4c8g/200G |
+| 192.168.1.221 | node                      | 4c8g/200G |
+| 192.168.1.222 | node                      | 4c8g/200G |
+| 192.168.1.223 | node                      | 4c8g/200G |
+
+* 注意1：确保各节点时区设置一致、时间同步。 如果你的环境没有提供NTP 时间同步，推荐集成安装chrony
+* 注意2：确保在干净的系统上开始安装，不要使用曾经装过kubeadm或其他k8s发行版的环境
+* 注意3：建议操作系统升级到新的稳定内核，请结合阅读内核升级文档
+
+#### 环境准备
+1.升级系统内核
+```
+# 载入公钥
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+# 安装ELRepo
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+# 载入elrepo-kernel元数据
+yum --disablerepo=\* --enablerepo=elrepo-kernel repolist
+# 查看可用的rpm包
+yum --disablerepo=\* --enablerepo=elrepo-kernel list kernel*
+# 安装长期支持版本的kernel
+yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-lt.x86_64
+# 删除旧版本工具包
+yum remove kernel-tools-libs.x86_64 kernel-tools.x86_64 -y
+# 安装新版本工具包
+yum --disablerepo=\* --enablerepo=elrepo-kernel install -y kernel-lt-tools.x86_64
+
+#查看默认启动顺序
+awk -F\' '$1=="menuentry " {print $2}' /etc/grub2.cfg  
+CentOS Linux (4.4.183-1.el7.elrepo.x86_64) 7 (Core)  
+CentOS Linux (3.10.0-327.10.1.el7.x86_64) 7 (Core)  
+CentOS Linux (0-rescue-c52097a1078c403da03b8eddeac5080b) 7 (Core)
+#默认启动的顺序是从0开始，新内核是从头插入（目前位置在0，而4.4.4的是在1），所以需要选择0。
+grub2-set-default 0  
+#重启并检查
+reboot
+```
+2.时间同步
+```
+# crontab  -e
+*/3 * * * * /usr/sbin/ntpdate time1.aliyun.com &> /dev/null
+```
+3.所有节点编译安装python-3.10.x
+``` 
+# 安装编译依赖
+ yum install gcc  ncurses-devel gdbm-devel xz-devel sqlite-devel tk-devel uuid-devel readline-devel bzip2-devel libffi-devel
+# 安装openssl11
+yum install -y openssl-devel openssl11 openssl11-devel
+# 验证 
+openssl11 version
+# 声明变量，安装ython3.10需要
+export CFLAGS=$(pkg-config --cflags openssl11)
+export LDFLAGS=$(pkg-config --libs openssl11)
+
+# 下载python软件包
+wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz
+# 解压
+tar -xf Python-3.10.4.tgz
+# 编译
+cd Python-3.10.4
+./configure --enable-optimizations && make altinstall
+# 验证
+python3.10 --version
+pip3.10 --version
+
+# 创建软连接，提供给kubeasz使用
+ln -sv /usr/local/bin/python3.10 /usr/bin/python3
+ln -sv /usr/local/bin/pip3.10 /usr/bin/pip3
+# 升级pip版本
+/usr/local/bin/python3.10 -m pip3 install --upgrade pip3
+```
+
+#### kubeasz节点准备
+
+1.在kubeasz节点安装ansible，建议使用单独的机器作为部署机器，这里复用k8s-master-01节点
+``` 
+pip3 install ansible==5.7.1  -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+2.在kubeasz节点准备密钥，实现集群主机互信
+```
+# 在kubeasz节点生成ssh密钥对
+ssh-keygen  -t rsa
+# 复制ssh密钥到k8s集群节点所有机器
+ for i in {111,112,113,221,222,223};do ssh-copy-id root@192.168.1.$i;done
+```
+
+3.在kubeasz节点获取kubeasz源码
+``` 
+git clone --branch v3.6  https://github.com/easzlab/kubeasz.git
+ls kubeasz/
+ansible.cfg  docs  example  ezctl  ezdown  manifests  pics  playbooks  README.md  roles  tools
+```
+- easzctl: 集群管理工具
+- ezdown: 获取部署文件
+
+5.执行ezdown获取部署文件到 `etc/kubeasz`
+```
+cd kubeasz 
+kubeasz]# ./ezdown --help
+./ezdown: 非法选项 -- -
+Usage: ezdown [options] [args]
+  option:
+    -C         stop&clean all local containers
+    -D         download default binaries/images into "/etc/kubeasz"
+    -P <OS>    download system packages of the OS (ubuntu_22,debian_11,...)
+    -R         download Registry(harbor) offline installer
+    -S         start kubeasz in a container
+    -X <opt>   download extra images
+    -d <ver>   set docker-ce version, default "25.0.3"
+    -e <ver>   set kubeasz-ext-bin version, default "1.10.0"
+    -k <ver>   set kubeasz-k8s-bin version, default "v1.29.2"
+    -m <str>   set docker registry mirrors, default "CN"(used in Mainland,China)
+    -z <ver>   set kubeasz version, default "3.6.3"
+
+./ezdown -D
+ls /etc/kubeasz/
+ansible.cfg  bin  docs  down  example  ezctl  ezdown  manifests  pics  playbooks  README.md  roles  tools
+[root@k8s-master-01 kubeasz]# docker  ps
+CONTAINER ID   IMAGE        COMMAND                   CREATED         STATUS         PORTS     NAMES
+5f009a0839c8   registry:2   "/entrypoint.sh /etc…"   2 minutes ago   Up 2 minutes             local_registry
+[root@k8s-master-01 kubeasz]# docker  images
+REPOSITORY                                           TAG       IMAGE ID       CREATED         SIZE
+easzlab/kubeasz-k8s-bin                              v1.29.2   615f59ecadb7   2 months ago    1.23GB
+easzlab/kubeasz-ext-bin                              1.10.0    cc2b126c8233   2 months ago    708MB
+easzlab/kubeasz                                      3.6.3     6b81f4bc80dc   4 months ago    157MB
+calico/kube-controllers                              v3.26.4   b32f99198153   5 months ago    74.7MB
+easzlab.io.local:5000/calico/kube-controllers        v3.26.4   b32f99198153   5 months ago    74.7MB
+calico/cni                                           v3.26.4   17d35f5bad38   5 months ago    209MB
+easzlab.io.local:5000/calico/cni                     v3.26.4   17d35f5bad38   5 months ago    209MB
+calico/node                                          v3.26.4   ded66453eb63   5 months ago    252MB
+easzlab.io.local:5000/calico/node                    v3.26.4   ded66453eb63   5 months ago    252MB
+registry                                             2         d6b2c32a0f14   7 months ago    25.4MB
+coredns/coredns                                      1.11.1    cbb01a7bd410   8 months ago    59.8MB
+easzlab.io.local:5000/coredns/coredns                1.11.1    cbb01a7bd410   8 months ago    59.8MB
+easzlab/metrics-server                               v0.6.4    c1623971df95   9 months ago    68.9MB
+easzlab.io.local:5000/easzlab/metrics-server         v0.6.4    c1623971df95   9 months ago    68.9MB
+easzlab/k8s-dns-node-cache                           1.22.23   81d6450452ae   10 months ago   68.4MB
+easzlab.io.local:5000/easzlab/k8s-dns-node-cache     1.22.23   81d6450452ae   10 months ago   68.4MB
+easzlab/pause                                        3.9       78d53e70b442   19 months ago   744kB
+easzlab.io.local:5000/easzlab/pause                  3.9       78d53e70b442   19 months ago   744kB
+kubernetesui/dashboard                               v2.7.0    07655ddf2eeb   19 months ago   246MB
+easzlab.io.local:5000/kubernetesui/dashboard         v2.7.0    07655ddf2eeb   19 months ago   246MB
+kubernetesui/metrics-scraper                         v1.0.8    115053965e86   23 months ago   43.8MB
+easzlab.io.local:5000/kubernetesui/metrics-scraper   v1.0.8    115053965e86   23 months ago   43.8MB
+```
+#### 初始化集群配置文件
+```
+# 切换目录
+cd /etc/kubeasz
+kubeasz]# ./ezctl new k8s-01
+2024-05-07 21:46:39 DEBUG generate custom cluster files in /etc/kubeasz/clusters/k8s-01
+2024-05-07 21:46:39 DEBUG set versions
+2024-05-07 21:46:39 DEBUG cluster k8s-01: files successfully created.
+2024-05-07 21:46:39 INFO next steps 1: to config '/etc/kubeasz/clusters/k8s-01/hosts'
+2024-05-07 21:46:39 INFO next steps 2: to config '/etc/kubeasz/clusters/k8s-01/config.yml'
+
+vim /etc/kubeasz/clusters/k8s-01/config.yml
+# k8s 集群 master 节点证书配置，可以添加多个ip和域名（比如增加公网ip和域名），如果有vip，则vip的地址也要写进去
+MASTER_CERT_HOSTS:
+  - "192.168.1.111"
+  - "192.168.1.113"
+  - "192.168.1.112"
+  - "k8s.easzlab.io"
+
+# 规划集群
+vim /etc/kubeasz/clusters/k8s-01/hosts
+```
+
+#### 使用ezctl工具部署K8s集群
+- 创建证书和环境准备: `./ezctl setup k8s-01 01`
+- 安装etcd集群: `./ezctl setup k8s-01 02`
+- 安装容器运行时: `./ezctl setup k8s-01 03`
+- 安装master节点: `./ezctl setup k8s-01 04`
+- 安装node节点: `./ezctl setup k8s-01 05`
+- 安装网络: `./ezctl setup k8s-01 06`
+- 安装集群插件: `./ezctl setup k8s-01 07`
+```
+Usage: ezctl setup <cluster> <step>
+available steps:
+    01  prepare            to prepare CA/certs & kubeconfig & other system settings
+    02  etcd               to setup the etcd cluster
+    03  container-runtime  to setup the container runtime(docker or containerd)
+    04  kube-master        to setup the master nodes
+    05  kube-node          to setup the worker nodes
+    06  network            to setup the network plugin
+    07  cluster-addon      to setup other useful plugins
+    90  all                to run 01~07 all at once
+    10  ex-lb              to install external loadbalance for accessing k8s from outside
+    11  harbor             to install a new harbor server or to integrate with an existed one
+
+examples: ./ezctl setup test-k8s 01  (or ./ezctl setup test-k8s prepare)
+	  ./ezctl setup test-k8s 02  (or ./ezctl setup test-k8s etcd)
+          ./ezctl setup test-k8s all
+          ./ezctl setup test-k8s 04 -t restart_master
+```
+#### 验证集群
+
+1. 验证集群内网络
+```
+kubectl  create deployment myapp --image=ikubernetes/myapp:v1 --replicas=5
+ kubectl  get pod  -o wide
+NAME                     READY   STATUS    RESTARTS   AGE     IP              NODE            NOMINATED NODE   READINESS GATES
+myapp-5d9c4b4647-4h2fx   1/1     Running   0          4m18s   172.20.36.194   k8s-worker-01   <none>           <none>
+myapp-5d9c4b4647-88kkz   1/1     Running   0          4m18s   172.20.7.129    k8s-worker-03   <none>           <none>
+myapp-5d9c4b4647-q749w   1/1     Running   0          4m18s   172.20.36.195   k8s-worker-01   <none>           <none>
+myapp-5d9c4b4647-xctgx   1/1     Running   0          4m18s   172.20.118.68   k8s-worker-02   <none>           <none>
+myapp-5d9c4b4647-xpdrp   1/1     Running   0          4m18s   172.20.7.130    k8s-worker-03   <none>           <none>
+
+kubectl expose deployment myapp  --port=80 --target-port=80
+kubectl  get svc/myapp
+NAME    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+myapp   ClusterIP   10.68.166.83   <none>        80/TCP    18s
+for i in `seq 10`;do curl 10.68.166.83/hostname.html;done
+myapp-5d9c4b4647-xpdrp
+myapp-5d9c4b4647-88kkz
+myapp-5d9c4b4647-q749w
+myapp-5d9c4b4647-4h2fx
+myapp-5d9c4b4647-xctgx
+myapp-5d9c4b4647-xpdrp
+
+kubectl get svc/kube-dns -n kube-system
+NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE
+kube-dns   ClusterIP   10.68.0.2    <none>        53/UDP,53/TCP,9153/TCP   51m
+yum install bind-utils -y
+dig -t A myapp.default.svc.cluster.local @10.68.0.2
+
+; <<>> DiG 9.11.4-P2-RedHat-9.11.4-26.P2.el7_9.15 <<>> -t A myapp.default.svc.cluster.local @10.68.0.2
+;; global options: +cmd
+;; Got answer:
+;; WARNING: .local is reserved for Multicast DNS
+;; You are currently testing what happens when an mDNS query is leaked to DNS
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 16541
+;; flags: qr aa rd; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;myapp.default.svc.cluster.local. IN	A
+
+;; ANSWER SECTION:
+myapp.default.svc.cluster.local. 30 IN	A	10.68.166.83
+
+;; Query time: 0 msec
+;; SERVER: 10.68.0.2#53(10.68.0.2)
+;; WHEN: 二 5月 07 23:22:57 CST 2024
+;; MSG SIZE  rcvd: 107
+```
+2.验证集群外网络
+```
+dig -t A www.qq.com @10.68.0.2
+
+; <<>> DiG 9.11.4-P2-RedHat-9.11.4-26.P2.el7_9.15 <<>> -t A www.qq.com @10.68.0.2
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 57593
+;; flags: qr rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;www.qq.com.			IN	A
+
+;; ANSWER SECTION:
+www.qq.com.		30	IN	CNAME	ins-r23tsuuf.ias.tencent-cloud.net.
+ins-r23tsuuf.ias.tencent-cloud.net. 30 IN A	221.198.70.47
+
+;; Query time: 17 msec
+;; SERVER: 10.68.0.2#53(10.68.0.2)
+;; WHEN: 二 5月 07 23:23:25 CST 2024
+;; MSG SIZE  rcvd: 147
+```
+#### 管理集群
+- 添加节点：` ./ezctl  add-node IP`
+- 删除节点：` ./ezctl  add-node IP`
+``` 
+# ./ezctl  --help
+Usage: ezctl COMMAND [args]
+-------------------------------------------------------------------------------------
+Cluster setups:
+    ...
+    start       <cluster>            to start all of the k8s services stopped by 'ezctl stop'
+    stop        <cluster>            to stop all of the k8s services temporarily
+    upgrade     <cluster>            to upgrade the k8s cluster
+    destroy     <cluster>            to destroy the k8s cluster
+    backup      <cluster>            to backup the cluster state (etcd snapshot)
+    restore     <cluster>            to restore the cluster state from backups
+    start-aio		             to quickly setup an all-in-one cluster with default settings
+Cluster ops:
+    add-etcd    <cluster>  <ip>      to add a etcd-node to the etcd cluster
+    add-master  <cluster>  <ip>      to add a master node to the k8s cluster
+    add-node    <cluster>  <ip>      to add a work node to the k8s cluster
+    del-etcd    <cluster>  <ip>      to delete a etcd-node from the etcd cluster
+    del-master  <cluster>  <ip>      to delete a master node from the k8s cluster
+    del-node    <cluster>  <ip>      to delete a work node from the k8s cluster
+```
+
 ## kubernetes客户端
 
 ### kubectl 命令说明

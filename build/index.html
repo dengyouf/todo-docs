@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="索引" href="genindex.html" />
     <link rel="search" title="搜索" href="search.html" />
-    <link rel="next" title="kubernetes入门" href="kubernetes/base.html" /> 
+    <link rel="next" title="kubernetes介绍" href="kubernetes/base.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,8 +46,16 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
               <p class="caption" role="heading"><span class="caption-text">云原生</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html">kubernetes入门</a></li>
-<li class="toctree-l1"><a class="reference internal" href="kubernetes/advance.html">kubernetes 进阶</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html">kubernetes介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id1">kubernetes架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id2">Kubernetes部署</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id10">kubernetes客户端</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id14">Kubernetes节点管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id26">kubernetes核心概念</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id27">kubernetes工作负载</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id42">kubernetes网络</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id48">kubernetes自动伸缩</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/ingress.html">kubernetes服务暴露</a></li>
 </ul>
 
         </div>
@@ -79,19 +87,52 @@
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">云原生</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html">kubernetes入门</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id1">kubernetes介绍</a></li>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id2">kubernetes架构</a></li>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id3">Kubernetes部署</a></li>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id7">kubernetes客户端</a></li>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id11">Kubernetes节点管理</a></li>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id23">kubernetes核心概念</a></li>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id24">kubernetes工作负载</a></li>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id40">自动伸缩</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html">kubernetes介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id1">kubernetes架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id2">Kubernetes部署</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#kubadmv1-22-6">使用Kubadm快速部署v1.22.6集群</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#kubeaszv1-29-2">基于kubeasz快速部署高可用的v1.29.2集群</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="kubernetes/advance.html">kubernetes 进阶</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="kubernetes/advance.html#id1">222</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id10">kubernetes客户端</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#kubectl">kubectl 命令说明</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id14">Kubernetes节点管理</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id15">集群信息</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id16">节点信息</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id19">节点标签</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id26">kubernetes核心概念</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#pod">Pod</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#controller">Controller</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#label">Label</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#label-selector">Label Selector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#service">Service</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#endpoints">Endpoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#dns">DNS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#namespace">Namespace</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id27">kubernetes工作负载</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id28">Pod</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id41">Controller</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id42">kubernetes网络</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id43">Service介绍</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#kube-proxy">kube-proxy代理模式</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#id44">Service类型</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/base.html#id48">kubernetes自动伸缩</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#hpa">水平自动伸缩HPA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/base.html#vpa">垂直自动伸缩VPA</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kubernetes/ingress.html">kubernetes服务暴露</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kubernetes/ingress.html#ingressnginx">IngressNginx</a></li>
 </ul>
 </li>
 </ul>
@@ -110,7 +151,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="页脚">
-        <a href="kubernetes/base.html" class="btn btn-neutral float-right" title="kubernetes入门" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="kubernetes/base.html" class="btn btn-neutral float-right" title="kubernetes介绍" accesskey="n" rel="next">下一页 <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

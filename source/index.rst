@@ -11,7 +11,8 @@
    :caption: 云原生
 
    kubernetes/base.md
-   kubernetes/advance.md
+   kubernetes/ingress.md
+
 
 
 

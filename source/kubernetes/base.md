@@ -1,6 +1,4 @@
-# kubernetes入门
-
-## kubernetes介绍
+# kubernetes介绍
 
 Kubernetes（也称 "k8s" 或 "kube"）是一个容器编排平台，用于调度和自动部署、管理和扩展容器化应用程序。
 
@@ -8,7 +6,7 @@ Kubernetes 最初由谷歌开发，并在 2014 年开源发布。它是 Google �
 
 ![img.png](../images/img.png)
 
-## kubernetes架构
+# kubernetes架构
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/overview/components/)  `https://kubernetes.io/zh-cn/docs/concepts/overview/components/`
 
@@ -46,11 +44,11 @@ kubelet 在生产环境中，控制平面通常跨多台计算机运行，一个
     - calico
     - canal
 
-## Kubernetes部署
+# Kubernetes部署
 
 > [官网](https://kubernetes.io/zh-cn/docs/tasks/tools/) ： `https://kubernetes.io/zh-cn/docs/tasks/tools/`
 
-### 使用Kubadm快速部署v1.22.6集群
+## 使用Kubadm快速部署v1.22.6集群
 
 使用 kubeadm 快速部署Kubernetes集群。操作系统为CentOS 7.6.1810 X86_64，用到的各相关程序版本如下：
 - kubernetes： v1.22.6
@@ -65,7 +63,7 @@ kubelet 在生产环境中，控制平面通常跨多台计算机运行，一个
 |k8s-worker-03| 192.168.122.33 | 4c8g/120G |
 
 
-#### 准备环境
+### 准备环境
 
 1.主机名hosts文件解析
 ``` 
@@ -179,7 +177,7 @@ libcrc32c              12288  3 nf_conntrack,xfs,ip_vs
 reboot
 ```
 
-#### 安装容器运行时
+### 安装容器运行时
 
 1.安装docker
 ```
@@ -211,7 +209,7 @@ EOF
 systemctl daemon-reload && systemctl restart docker
 ```
 
-#### 安装kubernetes集群
+### 安装kubernetes集群
 
 1.配置kubernetes源
 ``` 
@@ -428,7 +426,7 @@ myapp.default.svc.cluster.local. 30 IN  A       10.110.165.183
 ;; MSG SIZE  rcvd: 107
 ```
 
-#### 解决scheduler Unhealthy 问题
+### 解决scheduler Unhealthy 问题
 ```
 kubectl  get cs
 Warning: v1 ComponentStatus is deprecated in v1.19+
@@ -455,7 +453,7 @@ controller-manager   Healthy   ok
 etcd-0               Healthy   {"health":"true","reason":""}   
 ```
 
-#### 插件Add-on安装
+### 插件Add-on安装
 
 **安装Dashboard UI**
 
@@ -511,7 +509,7 @@ kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"
 ```
 4.访问dashboard
 - 访问地址： http://IP:30010
-[](../images/dashboard1.png)
+![](../images/dashboard1.png)
 
 
 **部署[metrics-server](https://github.com/kubernetes-sigs/metrics-server/releases)**
@@ -546,9 +544,9 @@ myapp-7d4b7b84b-fp8cf   0m           1Mi
 myapp-7d4b7b84b-h7zv8   0m           1Mi             
 myapp-7d4b7b84b-pr49x   0m           1Mi     
 ```
-[](../images/dashboard2.png)
+![](../images/dashboard2.png)
 
-### 基于kubeasz快速部署高可用的v1.29.2集群
+## 基于kubeasz快速部署高可用的v1.29.2集群
 
 > [官网](https://github.com/easzlab/kubeasz) : `https://github.com/easzlab/kubeasz`
 
@@ -570,7 +568,7 @@ myapp-7d4b7b84b-pr49x   0m           1Mi
 * 注意2：确保在干净的系统上开始安装，不要使用曾经装过kubeadm或其他k8s发行版的环境
 * 注意3：建议操作系统升级到新的稳定内核，请结合阅读内核升级文档
 
-#### 环境准备
+### 环境准备
 1.升级系统内核
 ```
 # 载入公钥
@@ -633,7 +631,7 @@ ln -sv /usr/local/bin/pip3.10 /usr/bin/pip3
 /usr/local/bin/python3.10 -m pip3 install --upgrade pip3
 ```
 
-#### kubeasz节点准备
+### kubeasz节点准备
 
 1.在kubeasz节点安装ansible，建议使用单独的机器作为部署机器，这里复用k8s-master-01节点
 ``` 
@@ -707,7 +705,7 @@ easzlab.io.local:5000/kubernetesui/dashboard         v2.7.0    07655ddf2eeb   19
 kubernetesui/metrics-scraper                         v1.0.8    115053965e86   23 months ago   43.8MB
 easzlab.io.local:5000/kubernetesui/metrics-scraper   v1.0.8    115053965e86   23 months ago   43.8MB
 ```
-#### 初始化集群配置文件
+### 初始化集群配置文件
 ```
 # 切换目录
 cd /etc/kubeasz
@@ -722,9 +720,9 @@ kubeasz]# ./ezctl new k8s-01
 # 配置集群
 vim /etc/kubeasz/clusters/k8s-01/config.yml
 cat /etc/kubeasz/clusters/k8s-01/config.yml
-############################
+###########################
 # prepare
-############################
+###########################
 # 可选离线安装系统软件包 (offline|online)
 INSTALL_SOURCE: "online"
 
@@ -733,9 +731,9 @@ INSTALL_SOURCE: "online"
 OS_HARDEN: false
 
 
-############################
+###########################
 # role:deploy
-############################
+###########################
 # default: ca will expire in 100 years
 # default: certs issued by the ca will expire in 50 years
 CA_EXPIRY: "876000h"
@@ -761,17 +759,17 @@ K8S_NODENAME: "{%- if k8s_nodename != '' -%} \
                     {{ inventory_hostname }} \
                {%- endif -%}"
 
-############################
+###########################
 # role:etcd
-############################
+###########################
 # 设置不同的wal目录，可以避免磁盘io竞争，提高性能
 ETCD_DATA_DIR: "/var/lib/etcd"
 ETCD_WAL_DIR: ""
 
 
-############################
+###########################
 # role:runtime [containerd,docker]
-############################
+###########################
 # [.]启用拉取加速镜像仓库
 ENABLE_MIRROR_REGISTRY: true
 
@@ -793,9 +791,9 @@ DOCKER_STORAGE_DIR: "/var/lib/docker"
 DOCKER_ENABLE_REMOTE_API: false
 
 
-############################
+###########################
 # role:kube-master
-############################
+###########################
 # k8s 集群 master 节点证书配置，可以添加多个ip和域名（比如增加公网ip和域名）,如果有vip，请把vip也写进去
 MASTER_CERT_HOSTS:
   - "192.168.1.111"
@@ -810,9 +808,9 @@ MASTER_CERT_HOSTS:
 NODE_CIDR_LEN: 24
 
 
-############################
+###########################
 # role:kube-node
-############################
+###########################
 # Kubelet 根目录
 KUBELET_ROOT_DIR: "/var/lib/kubelet"
 
@@ -830,9 +828,9 @@ KUBE_RESERVED_ENABLED: "no"
 SYS_RESERVED_ENABLED: "no"
 
 
-############################
+###########################
 # role:network [flannel,calico,cilium,kube-ovn,kube-router]
-############################
+###########################
 # ------------------------------------------- flannel
 # [flannel]设置flannel 后端"host-gw","vxlan"等
 FLANNEL_BACKEND: "vxlan"
@@ -888,9 +886,9 @@ FIREWALL_ENABLE: true
 kube_router_ver: "v1.5.4"
 
 
-############################
+###########################
 # role:cluster-addon
-############################
+###########################
 # coredns 自动安装
 dns_install: "yes"
 corednsVer: "1.11.1"
@@ -938,9 +936,9 @@ nfs_path: "/data/nfs"
 network_check_enabled: false
 network_check_schedule: "*/5 * * * *"
 
-############################
+###########################
 # role:harbor
-############################
+###########################
 # harbor version，完整版本号
 HARBOR_VER: "v2.8.4"
 HARBOR_DOMAIN: "harbor.easzlab.io.local"
@@ -1042,7 +1040,7 @@ k8s_nodename=''
 ansible_python_interpreter=/usr/bin/python3
 ```
 
-#### 使用ezctl工具部署K8s集群
+### 使用ezctl工具部署K8s集群
 - 创建证书和环境准备: `./ezctl setup k8s-01 01`
 - 安装etcd集群: `./ezctl setup k8s-01 02`
 - 安装容器运行时: `./ezctl setup k8s-01 03`
@@ -1069,7 +1067,7 @@ examples: ./ezctl setup test-k8s 01  (or ./ezctl setup test-k8s prepare)
           ./ezctl setup test-k8s all
           ./ezctl setup test-k8s 04 -t restart_master
 ```
-#### 验证集群
+### 验证集群
 
 1. 验证集群内网络
 ```
@@ -1146,7 +1144,7 @@ ins-r23tsuuf.ias.tencent-cloud.net. 30 IN A	221.198.70.47
 ;; WHEN: 二 5月 07 23:23:25 CST 2024
 ;; MSG SIZE  rcvd: 147
 ```
-#### 管理集群
+### 管理集群
 - 添加节点：` ./ezctl  add-node IP`
 - 删除节点：` ./ezctl  add-node IP`
 ``` 
@@ -1171,16 +1169,16 @@ Cluster ops:
     del-node    <cluster>  <ip>      to delete a work node from the k8s cluster
 ```
 
-## kubernetes客户端
+# kubernetes客户端
 
-### kubectl 命令说明
+## kubectl 命令说明
 
-#### 获取帮助信息
+### 获取帮助信息
 ```shell
 kubectl  -h
 ```
 
-#### 命令说明
+### 命令说明
 
 - 基础命令
   - create
@@ -1228,7 +1226,7 @@ kubectl  -h
   - plugin
   - version
 
-#### 命令补全
+### 命令补全
 
 ```
 yum install -y bash-completion
@@ -1240,9 +1238,9 @@ echo "source  '/root/.kube/completion.bash.inc'" >> ~/.bashrc
 source  ~/.bashrc
 ```
 
-## Kubernetes节点管理
+# Kubernetes节点管理
 
-### 集群信息
+## 集群信息
 ``` 
 ~]# kubectl cluster-info 
 Kubernetes control plane is running at https://kubeadm-vip.linux.io:6443
@@ -1251,9 +1249,9 @@ CoreDNS is running at https://kubeadm-vip.linux.io:6443/api/v1/namespaces/kube-s
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
 
-### 节点信息
+## 节点信息
 
-#### 查看所有节点信息
+### 查看所有节点信息
 ``` 
 [root@k8s-master-01 ~]# kubectl  get nodes
 NAME            STATUS   ROLES                  AGE    VERSION
@@ -1266,7 +1264,7 @@ NAME            STATUS   ROLES    AGE    VERSION   INTERNAL-IP      EXTERNAL-IP 
 k8s-worker-01   Ready    <none>   121m   v1.22.6   192.168.122.31   <none>        CentOS Linux 7 (Core)   6.8.9-1.el7.elrepo.x86_64   docker://20.10.9
 ```
 
-#### 查看节点描述信息
+### 查看节点描述信息
 ```
 ~]# kubectl  describe node k8s-master-01
 Name:               k8s-master-01
@@ -1373,9 +1371,9 @@ Events:
   Normal  NodeReady                29m   kubelet  Node k8s-master-01 status is now: NodeReady
 ```
 
-### 节点标签
+## 节点标签
 
-#### 查看节点标签信息
+### 查看节点标签信息
 ```
 ~]# kubectl  get nodes --show-labels 
 NAME            STATUS   ROLES                  AGE    VERSION   LABELS
@@ -1384,14 +1382,14 @@ k8s-worker-01   Ready    <none>                 127m   v1.22.6   beta.kubernetes
 k8s-worker-02   Ready    <none>                 126m   v1.22.6   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8s-worker-02,kubernetes.io/os=linux
 k8s-worker-03   Ready    <none>                 126m   v1.22.6   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=k8s-worker-03,kubernetes.io/os=linux
 ```
-#### 设置节点标签
+### 设置节点标签
 
 为k8s-worker-01节点打一个区域标签 region=beijing
 ```
 ~]# kubectl  label node k8s-worker-01 region=beijing
 ```
 
-#### 通过标签过滤节点
+### 通过标签过滤节点
 使用 `-l` 过滤相关标签的节点，如果标签由多个，用逗号分割
 ```
 ~]# kubectl  get nodes -l region
@@ -1403,19 +1401,19 @@ NAME            STATUS   ROLES    AGE    VERSION
 k8s-worker-01   Ready    <none>   132m   v1.22.6
 ```
 
-#### 修改标签
+### 修改标签
 
 ``` 
 kubectl  label node k8s-worker-01 zone=cn--overwrite
 ```
 
-#### 删除标签
+### 删除标签
 去除region标签
 ```
 ]# kubectl  label node k8s-worker-01 region-
 ```
 
-#### 标签选择器
+### 标签选择器
 - 等值关系
   - `=`
   - `!=`
@@ -1425,9 +1423,9 @@ kubectl  label node k8s-worker-01 zone=cn--overwrite
 ~]# kubectl  get nodes -l 'region in (shanghai,beijing)'
 ```
 
-## kubernetes核心概念
+# kubernetes核心概念
 
-### Pod
+## Pod
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/) : `https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/` 
 
@@ -1439,7 +1437,7 @@ Kubernetes 集群中的 Pod 主要有两种用法：
 
 **静态Pod(Static Pod)** 直接由特定节点上的 kubelet 守护进程管理， 不需要 API 服务器看到它们。 尽管大多数 Pod 都是通过控制面（例如，Deployment） 来管理的，对于静态 Pod 而言，kubelet 直接监控每个 Pod,例如kubeadm安装得k8s集群中运行得kube-apiserver、kube-scheduler等控制平面组件都是静态Pod，Kubelet通过监控`/etc/kubernetes/manifests/`目录下的文件，对这些静态Pod镜像管理。
 
-### Controller
+## Controller
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/architecture/controller/) : `https://kubernetes.io/zh-cn/docs/concepts/architecture/controller/` 
 
@@ -1464,7 +1462,7 @@ Kubernetes 提供若干种内置的工作负载资源：
 - CronJob
   - 周期性定时任务,根据某个排期表来多次运行同一个 Job
 
-### Label
+## Label
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/overview/working-with-objects/labels/) : `https://kubernetes.io/zh-cn/docs/concepts/overview/working-with-objects/labels/`
 
@@ -1482,7 +1480,7 @@ Label 是附着到 kubernetes 资源对象上的键值对，可以在创建对�
 |质量管控标签| "track": "daily"<br>"track": "weekly"|
 
 
-### Label Selector
+## Label Selector
 
 > [官网](https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/common-definitions/label-selector/) ： `https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/common-definitions/label-selector/`
 
@@ -1498,7 +1496,7 @@ Label Selector 有两种类型，可以通过都好分割多个表达式：
   - `noint`
   - `!key`: 表示没有此key
 
-### Service
+## Service
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/services-networking/service/) :`https://kubernetes.io/zh-cn/docs/concepts/services-networking/service/`
 
@@ -1506,13 +1504,13 @@ kubernetes 中 Service 是 将运行在一个或一组 Pod 上的网络应用程
 
 当一个Pod被意外终止后，自动恢复，其IP或发生变化，为了给用户/客户端提供一个固定得访问入口，Kubernetes 提供了Service资源对象，他是一组Iptables或IPVS规则，用来给用户提供一个固定得访问入口。
 
-### Endpoints
+## Endpoints
 
 > [官网](https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/service-resources/endpoints-v1/) ： `https://kubernetes.io/zh-cn/docs/reference/kubernetes-api/service-resources/endpoints-v1/`
 
 Service 通过Label筛选出符合条件得Pod集合，但是他并不会直接管理这些Pod IP，而是通过Endpoints管理，当后端Pod被创建或者销毁时，endpoints列表会更新Pod对应的IP地址，一边Service访问请求确保被正常响应
 
-### DNS
+## DNS
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/services-networking/dns-pod-service/) : `https://kubernetes.io/zh-cn/docs/concepts/services-networking/dns-pod-service/`
 
@@ -1520,22 +1518,31 @@ Service 通过Label筛选出符合条件得Pod集合，但是他并不会直接�
 - 实现集群内Service名称解析
 - 实现集群内Pod内容器中应用访问互联网，提供域名解析
 
-## kubernetes工作负载
+## Namespace
+
+> [官网](https://kubernetes.io/zh-cn/docs/concepts/overview/working-with-objects/namespaces/) : `https://kubernetes.io/zh-cn/docs/concepts/overview/working-with-objects/namespaces/`
+
+名字空间（Namespace） 提供一种机制，将同一集群中的资源划分为相互隔离的组。 同一名字空间内的资源名称要唯一，但跨名字空间时没有这个要求
+
+
+# kubernetes工作负载
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/workloads/): `https://kubernetes.io/zh-cn/docs/concepts/workloads/`
-### Pod
+## Pod
 
-#### Pod定义
+### Pod定义
+
+![](../images/pod3.png)
 - Pod 是 Kubernetes集群管理(创建、部署)与调度得最小计算单元，表示处于运行状态得一组容器
 - Pod不是京城，而是容器得运行环境
 - Pod内多个容器共享网络、存储、IPC命名空间
 - Pod的IP不是固定的，集群外不能直接访问
 
-#### Pod分类
+### Pod分类
 - 静态Pod：也叫自主式Pod，有kubelet守护进程直接管理
 - 控制器管理的Pod： 控制器可以控制Pod的副本数、包括其扩容与裁剪，版本更新或回滚等
 
-#### Pod管理
+### Pod管理
 
 - 创建
 ```
@@ -1562,7 +1569,7 @@ status: {}
 ~]# kubectl  delete pod nginx
 ```
 
-#### 镜像的下载策略
+### 镜像的下载策略
 镜像的拉取测率由imagePullPolicy参数控制
 - Always：总是拉取
   - 当镜像的版本是latest是，默认策略为Always
@@ -1585,7 +1592,7 @@ spec:
     imagePullPolicy: IfNotPresent
 ```
 
-#### 资源限制
+### 资源限制
 
 ```
 ---
@@ -1610,7 +1617,7 @@ spec:
         memory: "100Mi"
 ```
 
-#### 重启策略
+### 重启策略
 
 ```
 ---
@@ -1636,7 +1643,7 @@ spec:
   restartPolicy: Never
 ```
 
-#### 多容器Pod
+### 多容器Pod
 
 ```
 apiVersion: v1
@@ -1671,7 +1678,7 @@ spec:
   restartPolicy: Never
 ```
 
-#### Pod的调度
+### Pod的调度
 
 ![](../images/pod1.png)
 
@@ -1683,7 +1690,7 @@ spec:
   - 2.挑选优先级高的
 - kubeclt 通过watch etcd数据库，发现有新的Pod调度过来，则调用Runc创建容器，并将创建结果返回给 API Server用于更新etcd数据库
 
-#### 调度的约束方法
+### 调度的约束方法
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/scheduling-eviction/assign-pod-node/) ：`https://kubernetes.io/zh-cn/docs/concepts/scheduling-eviction/assign-pod-node/`
 
@@ -1726,11 +1733,11 @@ spec:
 kubectl  label node k8s-worker-02 disktype=ssd 
 ```
 
-#### 生命周期
+### 生命周期
 
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/pod-lifecycle/) : `https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/pod-lifecycle/`
 
-![](../images/pod2.png)
+![](../images/pod21.png)
 
 - Pod中的容器再创建前有初始化容器(InitC)来进行环境初始化
 - 环境初始化完成以后主容器(MainC)开始启动
@@ -1741,19 +1748,452 @@ kubectl  label node k8s-worker-02 disktype=ssd
 - 容器结束前会限制性preStop的操作（结束前触发型操作，或者叫结束前后钩子）
 - 结束后进行销毁或者重启，这个根据容器启动策略而定
 
-#### 健康检查
+### 健康检查
 
-#### 状态及故障排查
+### 状态及故障排查
 
-### Controller
+## Controller
  
 > [官网](https://kubernetes.io/zh-cn/docs/concepts/architecture/controller/) : `https://kubernetes.io/zh-cn/docs/concepts/architecture/controller/` 
 
-### Service
+# kubernetes网络
+## Service介绍
 
-## kubernetes自动伸缩
+kubernetes集群运行工作负载时，由于Pod经常处于用后即焚的状态，Pod 经常被重新生辰，因此Pod对应的IP地址也会经常变化，导致无法直接访问Pod提供的服务，kubernetes 引入Service解决了这类问题，即在Pod的前面使用Service对PodIP进行代理，无论Pod的IP怎样变化，Service通过标签Label都能够联系上对应的Pod，并把PodIP地址添加到Service对应的断电列表Endpoint，实现对Pod IP的跟着，进而实现通过Service固定访问Pod的目的。
 
-### 水平自动伸缩HPA
+![](../images/service00.png)
+
+- 通过Service为Pod提供固定访问Pod的方法
+- 通过标签动态感知Pod IP地址的变化
+- 防止Pod失联
+- 实现Pod的负载均衡(TCP/UDP4层)
+- 底层实现通由kube-proxy通过 userspace、iptables、ipvs三种代理模式
+- 类型
+  - ClusterIP
+  - NodePort
+  - LoadBalancer
+  - ExternalName
+
+## kube-proxy代理模式
+
+kubernetes集群中有三层网路，一类是真实存在的，例如节点IP(Node Network)和Pod IP (Pod Network),一类是虚拟的例如Cluster Network或Service IP，提供虚拟IP地址，不会出现在接口上，仅会出现在Service中。它是由kube-proxy始终watch(监控) kube-apiserver上关于Service相关资源的变动状态，一旦获取相关信息，kube-proxy就会将其转化为当前节点上能够实现Service资源调度到特定Pod的规则，进而实现通过Service去访问Pod所提供的服务。
+
+kube-proxy三种代理模式
+- userspace模式
+- iptables模式
+- ipvs模式
+
+![](../images/service01.png)
+
+### UserSpace模式
+userspace 模式是kube-proxy使用的第一代模式，改模式在 kubernetes v1.0版本就开始支持使用
+
+userspace模式实现原理图如下：
+![](../images/service02.png)
+
+kube-proxy会为每个Service随机监听一个端口(proxy port),并郑家一条iptables规则，所有通过CLusterIP访问Service的报文都会被重定向啊你到 proxy port。kube-proxy从它监听的 proxy port接收到报文后，通过round robin(默认)或者是session affinity(会话亲和力)分发给对应的Pod
+
+由于userspace模式造成的所有保温都会走一遍用户空间(也就是Service请求会先重用户空间进入内核iptables，然后再回到用户空间，有kube-proxy守护进程监听的proxy port完成后端Endpoints的选择和代理工作)，需要再内核空间和用户空间转换，流量从用户空间进出内核空间会带来的性能损耗，所以这种模式效率低，性能不高，不推荐使用
+
+### Iptables模式
+iptables模式是kube-proxy使用的第二代模式，该模式在kubernetes v1.1版本开始支持，从v1.2版本开始成为kube-proxy默认模式。
+
+iptables 模式的负载均衡通过底层netfilter/iptables 规则实现，通过 informer机制Watch接口，实施跟踪Service和Endpoint的边工时间，并触发iptables规则同步跟新。
+
+iptables模式的实现原理如荼所示：
+![](../images/service03.png)
+
+通过图示可以发现在iptables模式先，kube-proxy知识作为控制器，而不是service，正在服务的是内核的netfilter，体现在用户态是iptables，所以整体效率会有所提高。
+
+### ipvs模式
+
+ipvs模式是第三代代理模式，该模式在kubernetes v1.8 版本引入，在1.9版本你处于beta阶段，在v1.11版本中正式开始使用
+
+ipvs 实现了传输层负载均衡（四层交换），作为Linux内核的一部分。ipvs运行在主机上，在真实服务器前充当负载均衡器。ipvs可以将基于TCP和UDP的服务请求转发到真实服务器上，并使正式服务器上的服务在单个IP地址上显示虚拟服务
+
+ipvs模式的实现原理如图所示：
+![](../images/service04.png)
+
+
+- ipvs 为大型集群提供了更好的可拓展性和性能
+- ipvs支持比iptables更复杂的负载均衡算法（包括最小负载、最少连接、加权等）
+- ipvs支持服务健康检查和重试等功能
+- 可以动态的修改ipset的集合，即使iptables规则正在使用这个集合
+- 
+ipvs依赖iptables。ipvs会使用iptables进行包过滤、地址伪装、SNAT等功能，但是使用的是iptables的扩展ipset，病逝直接调用iptables来生成iptables规则链。通过ipset来存储需要DROP或者MASQUERADE的流量的源或目标地址，用于确保iptables规则的数量是恒定的，这样就不用担心有多少个Service或者Pod了。
+
+iptables是线性接口，而ipset引入了带索引的数据结构，当规则很多的时候 ipset依然可以搞笑的进行查询或者匹配，这样达达减少了iptables规则的查询性能损耗，所以ipvs模式比iptables更高效
+
+## Service类型
+
+- ClusterIP
+  - 默认模式，仅用于集群内可以访问的虚拟IP
+- NodePort
+  - 在每个Node节点上分配一个端口，用于接入集群外部的流量
+  - 端口范围通过kube-apiserver配置文件定义，默认为：30000~32767，
+- LoadBalancer
+  - 工作在特定的Cloud Provider上
+- ExternalName
+  - 将集群外部的服务引入到集群内部使用，实现集群内部Pod与集群外部服务进行通信
+
+
+
+### ClusterIP类型
+
+ClusterIP根据是否生成IP又可以分为ServiceIP和Headless Service
+- 普通Service
+  - 该Service分配一个集群内部可以固定访问的虚拟IP实现集群内访问
+- Headless Service
+  - 该服务不会分配IP也不通过kube-proxy作为防线个代理和负载均衡，二十通过DNS提供的网络ID进行访问，DNS会将headless service的后端直接解析为pod IP列表
+
+1.创建Deployment类型的应用
+``` 
+cat myapp-deply.yaml 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: myapp
+  name: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - image: ikubernetes/myapp:v1
+        name: myapp
+```
+#### 普通类型
+- 命令行创建
+``` 
+# kubectl  expose deployment/myapp   --type=ClusterIP --target-port=80 --port=80 --dry-run=client -o yaml
+```
+- yaml创建
+``` 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: myapp
+  name: myapp
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: myapp
+```
+#### Headless
+1.创建headless类型的Service
+```
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: myapp
+  name: myapp
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: myapp
+    
+# kubectl  describe svc/myapp
+Name:              myapp
+Namespace:         default
+Labels:            app=myapp
+Annotations:       <none>
+Selector:          app=myapp
+Type:              ClusterIP
+IP Family Policy:  SingleStack
+IP Families:       IPv4
+IP:                None
+IPs:               None
+Port:              <unset>  80/TCP
+TargetPort:        80/TCP
+Endpoints:         10.244.118.75:80,10.244.36.200:80,10.244.7.143:80
+Session Affinity:  None
+Events:            <none>
+```
+2.通过kube-dns服务查找headless服务的解析
+```
+# kubectl  get svc/kube-dns  -n kube-system
+NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)                  AGE
+kube-dns   ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP,9153/TCP   25h
+[root@k8s-master-01 services]# dig -t A myapp.default.svc.cluster.local @10.96.0.10
+
+; <<>> DiG 9.11.4-P2-RedHat-9.11.4-26.P2.el7_9.15 <<>> -t A myapp.default.svc.cluster.local @10.96.0.10
+;; global options: +cmd
+;; Got answer:
+;; WARNING: .local is reserved for Multicast DNS
+;; You are currently testing what happens when an mDNS query is leaked to DNS
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 34597
+;; flags: qr aa rd; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;myapp.default.svc.cluster.local. IN    A
+
+;; ANSWER SECTION:
+myapp.default.svc.cluster.local. 30 IN  A       10.244.118.75
+myapp.default.svc.cluster.local. 30 IN  A       10.244.7.143
+myapp.default.svc.cluster.local. 30 IN  A       10.244.36.200
+
+;; Query time: 0 msec
+;; SERVER: 10.96.0.10#53(10.96.0.10)
+;; WHEN: Wed May 08 11:23:23 CST 2024
+```
+
+### NodePort类型
+
+1.通过yaml方式创建
+``` 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: myapp
+  name: myapp
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    nodePort: 30080
+  selector:
+    app: myapp
+    
+kubectl  describe svc/myapp
+Name:                     myapp
+Namespace:                default
+Labels:                   app=myapp
+Annotations:              <none>
+Selector:                 app=myapp
+Type:                     NodePort
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.105.80.153
+IPs:                      10.105.80.153
+Port:                     <unset>  80/TCP
+TargetPort:               80/TCP
+NodePort:                 <unset>  30080/TCP
+Endpoints:                10.244.118.75:80,10.244.36.200:80,10.244.7.143:80
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+```
+2.通过集群内节点ip+端口方式进行访问
+``` 
+# 所有集群节点都会监听30080端口
+ss -tnlp|grep 30080
+LISTEN     0      4096         *:30080                    *:*                   users:(("kube-proxy",pid=15234,fd=16))
+# 通过任意集群节点IP进行访问
+curl 192.168.122.33:30080/hostname.html
+myapp-7d4b7b84b-dlrnj
+```
+
+### LoadBalancer类型
+
+#### MetalLB部署
+
+> [官网](https://metallb.universe.tf/installation/) :`https://metallb.universe.tf/installation/`
+MetalLB为自建的kubernetes集群中的LoadBalancer类型服务的解决方案，其具备两大功能
+- 地址分配：类似与DHCP
+- 外部通告：一旦MetalLB为服务分配外部IP地址后，他需要通知集群外的网络意识到该IP已经在集群中存在，MetalLB使用标准路由协议来实现此目的：ARP、NDP或BGP
+
+1.启用strict ARP mode.
+``` 
+kubectl edit configmap -n kube-system kube-proxy
+...
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: "ipvs"
+ipvs:
+  strictARP: true
+```
+2.部署metallb
+``` 
+wget https://raw.githubusercontent.com/metallb/metallb/v0.12/manifests/namespace.yaml
+wget https://raw.githubusercontent.com/metallb/metallb/v0.12/manifests/metallb.yaml
+kubectl  apply -f namespace.yaml  -f metallb.yaml
+```
+3.提供metallb配置清单文件
+``` 
+cat metallb-conf.yaml 
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: metallb-system
+  name: config
+data:
+  config: |
+    address-pools:
+    - name: default
+      protocol: layer2
+      addresses:
+      - 192.168.122.240-192.168.122.253 # 数据集群节点IP同网段
+kubectl  apply -f metallb-conf.yaml
+```
+#### 配置LoadBlanacer类型的service
+
+借助metalLB实现LoadBalancer类型的Service创建
+
+1.通过资源清单进行创建
+``` 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+  labels:
+    app: myapp
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: myapp
+```
+2.验证
+``` 
+kubectl  get svc myapp
+NAME    TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)        AGE
+myapp   LoadBalancer   10.100.87.61   192.168.122.240   80:30326/TCP   6s
+
+curl 192.168.122.240
+Hello MyApp | Version: v1 | <a href="hostname.html">Pod Name</a>
+```
+
+### ExternalName类型
+
+ExternalName类用的Service可以将集群外部的服务引入到集群内部中，集群内的Pod继承Node上DNS解析规则，这就实现集群内部Pod和集群外部服务之间的通信
+- 适用于外部服务使用域名的方式
+- 不能指定端口
+
+#### 引入公网域名
+
+1.编写YAML文件
+``` 
+cat myapp-svc-externalname-public.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-externalname
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: www.baidu.com #对应的外部域名
+  
+kubectl apply -f myapp-svc-externalname-public.yaml
+kubectl  get svc/my-externalname      
+NAME              TYPE           CLUSTER-IP   EXTERNAL-IP     PORT(S)   AGE
+my-externalname   ExternalName   <none>       www.baidu.com   <none>    30s
+```
+2.查看my-externalname的DNS解析
+```
+ dig -t A my-externalname.default.svc.cluster.local  @10.96.0.10
+
+; <<>> DiG 9.11.4-P2-RedHat-9.11.4-26.P2.el7_9.15 <<>> -t A my-externalname.default.svc.cluster.local @10.96.0.10
+;; global options: +cmd
+;; Got answer:
+;; WARNING: .local is reserved for Multicast DNS
+;; You are currently testing what happens when an mDNS query is leaked to DNS
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 42839
+;; flags: qr aa rd; QUERY: 1, ANSWER: 4, AUTHORITY: 0, ADDITIONAL: 1
+;; WARNING: recursion requested but not available
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+;; QUESTION SECTION:
+;my-externalname.default.svc.cluster.local. IN A
+
+;; ANSWER SECTION:
+my-externalname.default.svc.cluster.local. 30 IN CNAME www.baidu.com.
+www.baidu.com.          30      IN      CNAME   www.a.shifen.com.
+www.a.shifen.com.       30      IN      A       110.242.68.4  # 解析了百度的IP
+www.a.shifen.com.       30      IN      A       110.242.68.3  # 解析了百度的IP
+
+;; Query time: 17 msec
+;; SERVER: 10.96.0.10#53(10.96.0.10)
+;; WHEN: Wed May 08 12:49:13 CST 2024
+;; MSG SIZE  rcvd: 245
+```
+
+#### 不同命名空间访问
+``` 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ns2-svc
+  namespace: ns2
+spec:
+  ClusterIP: None
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ns1-externalname
+  namespace: ns2
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: ns1-svc.ns1.svc.cluster.local #将ns1中的service引入到ns2中
+```
+
+### SessionAffinity
+
+``` 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: myapp
+  name: myapp
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: myapp
+  sessionAffinity: ClientIP
+  
+# 对于已经存在的svc可以打补丁
+kubectl  patch svc myapp -p '{"spec": {"sessionAffinity": "ClientIP"}}'
+```
+
+# kubernetes自动伸缩
+
+## 水平自动伸缩HPA
 
 1.前提：部署metrices-server
 ```
@@ -1838,7 +2278,7 @@ nginx-hpa   Deployment/nginx-deploy   303%/50%   1         10        10         
 
 ```
 
-### 垂直自动伸缩VPA
+## 垂直自动伸缩VPA
 
 
 

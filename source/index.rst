@@ -12,6 +12,7 @@
 
    kubernetes/base.md
    kubernetes/ingress.md
+   kubernetes/config.md
 
 
 

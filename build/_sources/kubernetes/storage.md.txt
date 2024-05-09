@@ -408,10 +408,11 @@ this is subpath create dir.
 
 #### 基于NFS实现动态供给
 
+> [官网](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner) : `https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner`
 PV对存储系统的支持可以通过插件支持，目前kubernetes支持如下类型的[插件](https://kubernetes.io/zh-cn/docs/concepts/storage/storage-classes/)
 ![](../images/vol04.png)
 
-官网的插件是不支持NFS动态供给的，但是可以i通过第三方插件实现。
+官网的插件是不支持NFS动态供给的，但是可以通过第三方插件实现。
 第三方插件的访问地址：
 
 1. 创建nfs服务
@@ -431,4 +432,142 @@ yum install nfs-utils -y
 Export list for 10.4.111.141:
 /data/nfs *
 ```
+
+2.获取nfs插件配置文件
+``` 
+wget https://raw.githubusercontent.com/kubernetes-sigs/nfs-subdir-external-provisioner/master/deploy/class.yaml
+wget https://raw.githubusercontent.com/kubernetes-sigs/nfs-subdir-external-provisioner/master/deploy/rbac.yaml
+wget https://raw.githubusercontent.com/kubernetes-sigs/nfs-subdir-external-provisioner/master/deploy/deployment.yaml
+```
+3.配置deployment文件
+```shell
+nfs]# diff deployment.yaml{,.bak}
+24c24
+<           image: k8s.dockerproxy.com/sig-storage/nfs-subdir-external-provisioner:v4.0.2 # 修改镜像地址
+---
+>           image: registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
+32c32
+<               value: 10.4.111.141  # 修改成NFS IP
+---
+>               value: 10.3.243.101
+34c34
+<               value: /data/nfs   # 修改 nfs导出目录
+---
+>               value: /ifs/kubernetes
+38,39c38,39
+<             server: 10.4.111.141  # 修改成NFS IP
+<             path: /data/nfs # 修改 nfs导出目录
+---
+>             server: 10.3.243.101
+>             path: /ifs/kubernetes
+```
+4.应用资源清单
+``` 
+nfs]# kubectl  apply -f rbac.yaml  -f deployment.yaml  -f class.yaml 
+
+nfs]# kubectl  get pod 
+NAME                                      READY   STATUS    RESTARTS   AGE
+nfs-client-provisioner-748c677bb5-rf655   1/1     Running   0          26s
+nfs]# kubectl  get storageclass
+NAME         PROVISIONER                                   RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-client   k8s-sigs.io/nfs-subdir-external-provisioner   Delete          Immediate           false                  5m37s
+```
+5.将nfs-client设置成默认sc(可选)
+```
+nfs]# kubectl patch storageclass nfs-client -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+nfs]# kubectl  get storageclass
+NAME                   PROVISIONER                                   RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+nfs-client (default)   k8s-sigs.io/nfs-subdir-external-provisioner   Delete          Immediate           false                  7m39s
+```
+6.验证NFS动态供给
+``` 
+# 这里创建一个StatefulSet 资源来验证
+
+ 
+apiVersion: v1
+kind: Secret
+metadata:
+ name: mysqlpwd
+data:
+ password: cm9vdDEyMw== # root123
+ 
+---
+ 
+apiVersion: v1
+kind: Service
+metadata:
+ name: mysql
+ labels:
+   app: mysql
+spec:
+ type: ClusterIP
+ selector:
+   app: mysql
+ ports:
+   - port: 3306
+     protocol: TCP
+ clusterIP: "None"
+ 
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+ name: mysql
+spec:
+ selector:
+   matchLabels:
+     app: mysql
+ serviceName: mysql
+ replicas: 1
+ template:
+   metadata:
+     labels:
+       app: mysql
+   spec:
+     terminationGracePeriodSeconds: 10
+     containers:
+     - name: mysql
+       image: mysql:8
+       ports:
+       - containerPort: 3306
+         name: mysql
+       env:
+       - name: MYSQL_ROOT_PASSWORD
+         valueFrom:
+           secretKeyRef:
+             name: mysqlpwd
+             key: password
+       - name: MYSQL_DATABASE
+         value: "todo_db"
+       volumeMounts:
+       - mountPath: /var/lib/mysql
+         name: volume
+ volumeClaimTemplates:
+ - metadata:
+     name: volume
+   spec:
+     storageClassName: nfs-client
+     accessModes: [ "ReadWriteOnce" ]
+     resources:
+       requests:
+         storage: 1Gi
+nfs]# kubectl  apply -f statefulset-mysql.yaml
+
+nfs]# kubectl  get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                    STORAGECLASS   REASON   AGE
+pvc-7c99239c-a9e5-477d-9565-488ca363d182   1Gi        RWO            Delete           Bound    default/volume-mysql-0   nfs-client              95s
+[root@k8s-master-01 nfs]# kubectl  get pvc
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+volume-mysql-0   Bound    pvc-7c99239c-a9e5-477d-9565-488ca363d182   1Gi        RWO            nfs-client     102s
+[root@k8s-master-01 nfs]# kubectl  get pod
+NAME                                      READY   STATUS    RESTARTS   AGE
+mysql-0                                   1/1     Running   0          105s
+
+# nfs服务导出目录会自动创建一个目录
+~]# ls /data/nfs/
+default-volume-mysql-0-pvc-7c99239c-a9e5-477d-9565-488ca363d182
+```
+- pv会以`${namespace}`-`${pvcName}`-`${pvName}` 的命名格式在NFS服务器上自动创建
+- 
+
 

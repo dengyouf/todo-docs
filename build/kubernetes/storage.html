@@ -559,9 +559,12 @@ vol-pod-emptydir<span class="w">   </span><span class="m">2</span>/2<span class=
 <p>每次使用存储时，需要预先创建存储，然后通过PVC来声明存储的使用，这样的工作比较繁琐，有没有简单高效的办法使用存储呢？答案是有的，Kubernetes v1.4版本引入一个新的资源对象 StorageClass 存储类，用户无需预先创建存储，而是在使用时，通过PVC自动向存储类按需自动创建PV。</p>
 <section id="id5">
 <h4>基于NFS实现动态供给<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
-<p>PV对存储系统的支持可以通过插件支持，目前kubernetes支持如下类型的<a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/storage/storage-classes/">插件</a>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner</span></code>
+PV对存储系统的支持可以通过插件支持，目前kubernetes支持如下类型的<a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/storage/storage-classes/">插件</a>
 <img alt="../_images/vol04.png" src="../_images/vol04.png" /></p>
-<p>官网的插件是不支持NFS动态供给的，但是可以i通过第三方插件实现。
+</div></blockquote>
+<p>官网的插件是不支持NFS动态供给的，但是可以通过第三方插件实现。
 第三方插件的访问地址：</p>
 <ol class="simple">
 <li><p>创建nfs服务</p></li>
@@ -582,6 +585,144 @@ vol-pod-emptydir<span class="w">   </span><span class="m">2</span>/2<span class=
 <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span> <span class="o">*</span>
 </pre></div>
 </div>
+<p>2.获取nfs插件配置文件</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">sigs</span><span class="o">/</span><span class="n">nfs</span><span class="o">-</span><span class="n">subdir</span><span class="o">-</span><span class="n">external</span><span class="o">-</span><span class="n">provisioner</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">class</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">sigs</span><span class="o">/</span><span class="n">nfs</span><span class="o">-</span><span class="n">subdir</span><span class="o">-</span><span class="n">external</span><span class="o">-</span><span class="n">provisioner</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">rbac</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">wget</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">sigs</span><span class="o">/</span><span class="n">nfs</span><span class="o">-</span><span class="n">subdir</span><span class="o">-</span><span class="n">external</span><span class="o">-</span><span class="n">provisioner</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">deploy</span><span class="o">/</span><span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+</pre></div>
+</div>
+<p>3.配置deployment文件</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>nfs<span class="o">]</span><span class="c1"># diff deployment.yaml{,.bak}</span>
+24c24
+&lt;<span class="w">           </span>image:<span class="w"> </span>k8s.dockerproxy.com/sig-storage/nfs-subdir-external-provisioner:v4.0.2<span class="w"> </span><span class="c1"># 修改镜像地址</span>
+---
+&gt;<span class="w">           </span>image:<span class="w"> </span>registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
+32c32
+&lt;<span class="w">               </span>value:<span class="w"> </span><span class="m">10</span>.4.111.141<span class="w">  </span><span class="c1"># 修改成NFS IP</span>
+---
+&gt;<span class="w">               </span>value:<span class="w"> </span><span class="m">10</span>.3.243.101
+34c34
+&lt;<span class="w">               </span>value:<span class="w"> </span>/data/nfs<span class="w">   </span><span class="c1"># 修改 nfs导出目录</span>
+---
+&gt;<span class="w">               </span>value:<span class="w"> </span>/ifs/kubernetes
+<span class="m">38</span>,39c38,39
+&lt;<span class="w">             </span>server:<span class="w"> </span><span class="m">10</span>.4.111.141<span class="w">  </span><span class="c1"># 修改成NFS IP</span>
+&lt;<span class="w">             </span>path:<span class="w"> </span>/data/nfs<span class="w"> </span><span class="c1"># 修改 nfs导出目录</span>
+---
+&gt;<span class="w">             </span>server:<span class="w"> </span><span class="m">10</span>.3.243.101
+&gt;<span class="w">             </span>path:<span class="w"> </span>/ifs/kubernetes
+</pre></div>
+</div>
+<p>4.应用资源清单</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  apply -f rbac.yaml  -f deployment.yaml  -f class.yaml </span>
+
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get pod </span>
+<span class="n">NAME</span>                                      <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">nfs</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">provisioner</span><span class="o">-</span><span class="mi">748</span><span class="n">c677bb5</span><span class="o">-</span><span class="n">rf655</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">26</span><span class="n">s</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get storageclass</span>
+<span class="n">NAME</span>         <span class="n">PROVISIONER</span>                                   <span class="n">RECLAIMPOLICY</span>   <span class="n">VOLUMEBINDINGMODE</span>   <span class="n">ALLOWVOLUMEEXPANSION</span>   <span class="n">AGE</span>
+<span class="n">nfs</span><span class="o">-</span><span class="n">client</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">sigs</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nfs</span><span class="o">-</span><span class="n">subdir</span><span class="o">-</span><span class="n">external</span><span class="o">-</span><span class="n">provisioner</span>   <span class="n">Delete</span>          <span class="n">Immediate</span>           <span class="n">false</span>                  <span class="mi">5</span><span class="n">m37s</span>
+</pre></div>
+</div>
+<p>5.将nfs-client设置成默认sc(可选)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl patch storageclass nfs-client -p &#39;{&quot;metadata&quot;: {&quot;annotations&quot;:{&quot;storageclass.kubernetes.io/is-default-class&quot;:&quot;true&quot;}}}&#39;</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get storageclass</span>
+<span class="n">NAME</span>                   <span class="n">PROVISIONER</span>                                   <span class="n">RECLAIMPOLICY</span>   <span class="n">VOLUMEBINDINGMODE</span>   <span class="n">ALLOWVOLUMEEXPANSION</span>   <span class="n">AGE</span>
+<span class="n">nfs</span><span class="o">-</span><span class="n">client</span> <span class="p">(</span><span class="n">default</span><span class="p">)</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">sigs</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">nfs</span><span class="o">-</span><span class="n">subdir</span><span class="o">-</span><span class="n">external</span><span class="o">-</span><span class="n">provisioner</span>   <span class="n">Delete</span>          <span class="n">Immediate</span>           <span class="n">false</span>                  <span class="mi">7</span><span class="n">m39s</span>
+</pre></div>
+</div>
+<p>6.验证NFS动态供给</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 这里创建一个StatefulSet 资源来验证</span>
+
+ 
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Secret</span>
+<span class="n">metadata</span><span class="p">:</span>
+ <span class="n">name</span><span class="p">:</span> <span class="n">mysqlpwd</span>
+<span class="n">data</span><span class="p">:</span>
+ <span class="n">password</span><span class="p">:</span> <span class="n">cm9vdDEyMw</span><span class="o">==</span> <span class="c1"># root123</span>
+ 
+<span class="o">---</span>
+ 
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="p">:</span>
+ <span class="n">name</span><span class="p">:</span> <span class="n">mysql</span>
+ <span class="n">labels</span><span class="p">:</span>
+   <span class="n">app</span><span class="p">:</span> <span class="n">mysql</span>
+<span class="n">spec</span><span class="p">:</span>
+ <span class="nb">type</span><span class="p">:</span> <span class="n">ClusterIP</span>
+ <span class="n">selector</span><span class="p">:</span>
+   <span class="n">app</span><span class="p">:</span> <span class="n">mysql</span>
+ <span class="n">ports</span><span class="p">:</span>
+   <span class="o">-</span> <span class="n">port</span><span class="p">:</span> <span class="mi">3306</span>
+     <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+ <span class="n">clusterIP</span><span class="p">:</span> <span class="s2">&quot;None&quot;</span>
+ 
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">StatefulSet</span>
+<span class="n">metadata</span><span class="p">:</span>
+ <span class="n">name</span><span class="p">:</span> <span class="n">mysql</span>
+<span class="n">spec</span><span class="p">:</span>
+ <span class="n">selector</span><span class="p">:</span>
+   <span class="n">matchLabels</span><span class="p">:</span>
+     <span class="n">app</span><span class="p">:</span> <span class="n">mysql</span>
+ <span class="n">serviceName</span><span class="p">:</span> <span class="n">mysql</span>
+ <span class="n">replicas</span><span class="p">:</span> <span class="mi">1</span>
+ <span class="n">template</span><span class="p">:</span>
+   <span class="n">metadata</span><span class="p">:</span>
+     <span class="n">labels</span><span class="p">:</span>
+       <span class="n">app</span><span class="p">:</span> <span class="n">mysql</span>
+   <span class="n">spec</span><span class="p">:</span>
+     <span class="n">terminationGracePeriodSeconds</span><span class="p">:</span> <span class="mi">10</span>
+     <span class="n">containers</span><span class="p">:</span>
+     <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">mysql</span>
+       <span class="n">image</span><span class="p">:</span> <span class="n">mysql</span><span class="p">:</span><span class="mi">8</span>
+       <span class="n">ports</span><span class="p">:</span>
+       <span class="o">-</span> <span class="n">containerPort</span><span class="p">:</span> <span class="mi">3306</span>
+         <span class="n">name</span><span class="p">:</span> <span class="n">mysql</span>
+       <span class="n">env</span><span class="p">:</span>
+       <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">MYSQL_ROOT_PASSWORD</span>
+         <span class="n">valueFrom</span><span class="p">:</span>
+           <span class="n">secretKeyRef</span><span class="p">:</span>
+             <span class="n">name</span><span class="p">:</span> <span class="n">mysqlpwd</span>
+             <span class="n">key</span><span class="p">:</span> <span class="n">password</span>
+       <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">MYSQL_DATABASE</span>
+         <span class="n">value</span><span class="p">:</span> <span class="s2">&quot;todo_db&quot;</span>
+       <span class="n">volumeMounts</span><span class="p">:</span>
+       <span class="o">-</span> <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span>
+         <span class="n">name</span><span class="p">:</span> <span class="n">volume</span>
+ <span class="n">volumeClaimTemplates</span><span class="p">:</span>
+ <span class="o">-</span> <span class="n">metadata</span><span class="p">:</span>
+     <span class="n">name</span><span class="p">:</span> <span class="n">volume</span>
+   <span class="n">spec</span><span class="p">:</span>
+     <span class="n">storageClassName</span><span class="p">:</span> <span class="n">nfs</span><span class="o">-</span><span class="n">client</span>
+     <span class="n">accessModes</span><span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;ReadWriteOnce&quot;</span> <span class="p">]</span>
+     <span class="n">resources</span><span class="p">:</span>
+       <span class="n">requests</span><span class="p">:</span>
+         <span class="n">storage</span><span class="p">:</span> <span class="mi">1</span><span class="n">Gi</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  apply -f statefulset-mysql.yaml</span>
+
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get pv</span>
+<span class="n">NAME</span>                                       <span class="n">CAPACITY</span>   <span class="n">ACCESS</span> <span class="n">MODES</span>   <span class="n">RECLAIM</span> <span class="n">POLICY</span>   <span class="n">STATUS</span>   <span class="n">CLAIM</span>                    <span class="n">STORAGECLASS</span>   <span class="n">REASON</span>   <span class="n">AGE</span>
+<span class="n">pvc</span><span class="o">-</span><span class="mi">7</span><span class="n">c99239c</span><span class="o">-</span><span class="n">a9e5</span><span class="o">-</span><span class="mi">477</span><span class="n">d</span><span class="o">-</span><span class="mi">9565</span><span class="o">-</span><span class="mi">488</span><span class="n">ca363d182</span>   <span class="mi">1</span><span class="n">Gi</span>        <span class="n">RWO</span>            <span class="n">Delete</span>           <span class="n">Bound</span>    <span class="n">default</span><span class="o">/</span><span class="n">volume</span><span class="o">-</span><span class="n">mysql</span><span class="o">-</span><span class="mi">0</span>   <span class="n">nfs</span><span class="o">-</span><span class="n">client</span>              <span class="mi">95</span><span class="n">s</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get pvc</span>
+<span class="n">NAME</span>             <span class="n">STATUS</span>   <span class="n">VOLUME</span>                                     <span class="n">CAPACITY</span>   <span class="n">ACCESS</span> <span class="n">MODES</span>   <span class="n">STORAGECLASS</span>   <span class="n">AGE</span>
+<span class="n">volume</span><span class="o">-</span><span class="n">mysql</span><span class="o">-</span><span class="mi">0</span>   <span class="n">Bound</span>    <span class="n">pvc</span><span class="o">-</span><span class="mi">7</span><span class="n">c99239c</span><span class="o">-</span><span class="n">a9e5</span><span class="o">-</span><span class="mi">477</span><span class="n">d</span><span class="o">-</span><span class="mi">9565</span><span class="o">-</span><span class="mi">488</span><span class="n">ca363d182</span>   <span class="mi">1</span><span class="n">Gi</span>        <span class="n">RWO</span>            <span class="n">nfs</span><span class="o">-</span><span class="n">client</span>     <span class="mi">102</span><span class="n">s</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get pod</span>
+<span class="n">NAME</span>                                      <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">mysql</span><span class="o">-</span><span class="mi">0</span>                                   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">105</span><span class="n">s</span>
+
+<span class="c1"># nfs服务导出目录会自动创建一个目录</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># ls /data/nfs/</span>
+<span class="n">default</span><span class="o">-</span><span class="n">volume</span><span class="o">-</span><span class="n">mysql</span><span class="o">-</span><span class="mi">0</span><span class="o">-</span><span class="n">pvc</span><span class="o">-</span><span class="mi">7</span><span class="n">c99239c</span><span class="o">-</span><span class="n">a9e5</span><span class="o">-</span><span class="mi">477</span><span class="n">d</span><span class="o">-</span><span class="mi">9565</span><span class="o">-</span><span class="mi">488</span><span class="n">ca363d182</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>pv会以<code class="docutils literal notranslate"><span class="pre">${namespace}</span></code>-<code class="docutils literal notranslate"><span class="pre">${pvcName}</span></code>-<code class="docutils literal notranslate"><span class="pre">${pvName}</span></code> 的命名格式在NFS服务器上自动创建</p></li>
+<li></li>
+</ul>
 </section>
 </section>
 </section>

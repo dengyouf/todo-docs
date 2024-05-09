@@ -17,6 +17,11 @@
    kubernetes/secure.md
    kubernetes/storage.md
 
+.. toctree::
+   :maxdepth: 2
+   :caption: 分布式存储
+
+   ceph/base.md
 
 
 

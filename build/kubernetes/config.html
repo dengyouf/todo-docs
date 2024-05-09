@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kubernetes配置与密钥管理 &mdash; SRE运维 v0.0.1 文档</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7cf98a4c"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=beaddf03"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="prev" title="kubernetes服务暴露" href="ingress.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SRE运维
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="搜索文档" aria-label="搜索文档" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
+              <p class="caption" role="heading"><span class="caption-text">云原生</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">kubernetes介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id1">kubernetes架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id2">Kubernetes部署</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id10">kubernetes客户端</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id14">Kubernetes节点管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id26">kubernetes核心概念</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id27">kubernetes工作负载</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id42">kubernetes网络</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id48">kubernetes自动伸缩</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ingress.html">kubernetes服务暴露</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kubernetes配置与密钥管理</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configmap">ConfigMap</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">configmap介绍</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">ConfigMap创建的四种方式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">1.在命令行中指定参数创建</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">2.在命令行通过多个文件创建</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">3.在命令行通过文件提供多个键值对创建</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#yaml">4.通过YAML资源清单创建</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">configmap的二种使用方式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pod">1.通过环境变量的方式传递给Pod</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#volumespod">2.通过volumes的方式挂载到Pod</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#secret">Secret</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">secret介绍</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">secret类型</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">secret应用案例</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id10">数据库密码案例</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#secret2">secret的2种使用方式</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id11">1.通过环境变量方式传递给Pod</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#volumepod">2.通过volume的方式挂载到Pod</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="移动版导航菜单" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SRE运维</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="页面导航">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">kubernetes配置与密钥管理</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kubernetes/config.md.txt" rel="nofollow"> 查看页面源码</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="kubernetes">
+<h1>kubernetes配置与密钥管理<a class="headerlink" href="#kubernetes" title="Link to this heading"></a></h1>
+<section id="configmap">
+<h2>ConfigMap<a class="headerlink" href="#configmap" title="Link to this heading"></a></h2>
+<section id="id1">
+<h3>configmap介绍<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>kubernetes 集群可以使用ConfigMap实现对容器中赢得配置管理，可以把configmap看成是挂载到pod中的存储卷。</p>
+<ul class="simple">
+<li><p>明文保存</p></li>
+<li><p>常用于配置文件管理</p></li>
+</ul>
+</section>
+<section id="id2">
+<h3>ConfigMap创建的四种方式<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<section id="id3">
+<h4>1.在命令行中指定参数创建<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl create configmap cm1 --from-literal=host=127.0.0.1 --from-literal=port=3306</span>
+<span class="n">configmap</span><span class="o">/</span><span class="n">cm1</span> <span class="n">created</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  describe cm/cm1</span>
+<span class="n">Name</span><span class="p">:</span>         <span class="n">cm1</span>
+<span class="n">Namespace</span><span class="p">:</span>    <span class="n">default</span>
+<span class="n">Labels</span><span class="p">:</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">Annotations</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+
+<span class="n">Data</span>
+<span class="o">====</span>
+<span class="n">host</span><span class="p">:</span>
+<span class="o">----</span>
+<span class="mf">127.0.0.1</span>
+<span class="n">port</span><span class="p">:</span>
+<span class="o">----</span>
+<span class="mi">3306</span>
+
+<span class="n">BinaryData</span>
+<span class="o">====</span>
+
+<span class="n">Events</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span> 
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h4>2.在命令行通过多个文件创建<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># echo -n 127.0.0.1 &gt; host</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># echo -n 3306 &gt; port</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  create cm cm2 --from-file=./host --from-file=./port</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  describe cm/cm2</span>
+<span class="n">Name</span><span class="p">:</span>         <span class="n">cm2</span>
+<span class="n">Namespace</span><span class="p">:</span>    <span class="n">default</span>
+<span class="n">Labels</span><span class="p">:</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">Annotations</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+
+<span class="n">Data</span>
+<span class="o">====</span>
+<span class="n">host</span><span class="p">:</span>
+<span class="o">----</span>
+<span class="mf">127.0.0.1</span>
+<span class="n">port</span><span class="p">:</span>
+<span class="o">----</span>
+<span class="mi">3306</span>
+
+<span class="n">BinaryData</span>
+<span class="o">====</span>
+
+<span class="n">Events</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h4>3.在命令行通过文件提供多个键值对创建<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cat env.txt</span>
+<span class="n">host</span><span class="o">=</span><span class="mf">127.0.0.1</span>
+<span class="n">port</span><span class="o">=</span><span class="mi">3306</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  create configmap cm3 --from-env-file=env.txt</span>
+<span class="n">configmap</span><span class="o">/</span><span class="n">cm3</span> <span class="n">created</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  describe cm/cm3</span>
+<span class="n">Name</span><span class="p">:</span>         <span class="n">cm3</span>
+<span class="n">Namespace</span><span class="p">:</span>    <span class="n">default</span>
+<span class="n">Labels</span><span class="p">:</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">Annotations</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+
+<span class="n">Data</span>
+<span class="o">====</span>
+<span class="n">host</span><span class="p">:</span>
+<span class="o">----</span>
+<span class="mf">127.0.0.1</span>
+<span class="n">port</span><span class="p">:</span>
+<span class="o">----</span>
+<span class="mi">3306</span>
+
+<span class="n">BinaryData</span>
+<span class="o">====</span>
+
+<span class="n">Events</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="yaml">
+<h4>4.通过YAML资源清单创建<a class="headerlink" href="#yaml" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="n">cm4</span><span class="o">.</span><span class="n">yaml</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">ConfigMap</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">cm4</span>
+<span class="n">data</span><span class="p">:</span>
+  <span class="n">host</span><span class="p">:</span> <span class="mf">127.0.0.1</span>
+  <span class="n">port</span><span class="p">:</span> <span class="s2">&quot;3306&quot;</span>
+  
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  apply -f cm4.yaml</span>
+<span class="n">configmap</span><span class="o">/</span><span class="n">cm4</span> <span class="n">created</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  describe cm/cm4</span>
+<span class="n">Name</span><span class="p">:</span>         <span class="n">cm4</span>
+<span class="n">Namespace</span><span class="p">:</span>    <span class="n">default</span>
+<span class="n">Labels</span><span class="p">:</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">Annotations</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+
+<span class="n">Data</span>
+<span class="o">====</span>
+<span class="n">host</span><span class="p">:</span>
+<span class="o">----</span>
+<span class="mf">127.0.0.1</span>
+<span class="n">port</span><span class="p">:</span>
+<span class="o">----</span>
+<span class="mi">3306</span>
+
+<span class="n">BinaryData</span>
+<span class="o">====</span>
+
+<span class="n">Events</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id6">
+<h3>configmap的二种使用方式<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<section id="pod">
+<h4>1.通过环境变量的方式传递给Pod<a class="headerlink" href="#pod" title="Link to this heading"></a></h4>
+<p>通过环境变量传递给Pod，这种方式不支持热部署</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cat cm-pod-env.yaml</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">cm</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">env</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">busybox</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">busybox</span><span class="p">:</span><span class="mf">1.28</span>
+    <span class="n">args</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;/bin/sh&quot;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;sleep 3600&quot;</span><span class="p">]</span>
+    <span class="n">envFrom</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">configMapRef</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">cm1</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  apply -f cm-pod-env.yaml</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  exec -it cm-pod-env -- env</span>
+<span class="n">PATH</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">sbin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="nb">bin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">sbin</span><span class="p">:</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="nb">bin</span><span class="p">:</span><span class="o">/</span><span class="n">sbin</span><span class="p">:</span><span class="o">/</span><span class="nb">bin</span>
+<span class="n">HOSTNAME</span><span class="o">=</span><span class="n">cm</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">env</span>
+<span class="n">host</span><span class="o">=</span><span class="mf">127.0.0.1</span>
+<span class="n">port</span><span class="o">=</span><span class="mi">3306</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="volumespod">
+<h4>2.通过volumes的方式挂载到Pod<a class="headerlink" href="#volumespod" title="Link to this heading"></a></h4>
+<p>通过volumes的方式挂载到Pod，key为挂载目录下的文件名，value为文件名内的内容，此方式<strong>支持热更新</strong>，更新时间间隔大概在30s左右。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cat cm-pod-vol.yaml</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">cm</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">vol</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">busybox</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">busybox</span><span class="p">:</span><span class="mf">1.28</span>
+    <span class="n">args</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;/bin/sh&quot;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;sleep 3600&quot;</span><span class="p">]</span>
+    <span class="n">volumeMounts</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">vol</span><span class="o">-</span><span class="n">cm</span>
+      <span class="n">mountPath</span><span class="p">:</span> <span class="s2">&quot;/data/mysql/etc&quot;</span>
+      <span class="n">readOnly</span><span class="p">:</span> <span class="n">true</span>
+  <span class="n">volumes</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">vol</span><span class="o">-</span><span class="n">cm</span>
+    <span class="n">configMap</span><span class="p">:</span>
+      <span class="n">name</span><span class="p">:</span> <span class="n">cm2</span>
+      
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl apply -f  cm-pod-vol.yaml</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  exec -it cm-pod-vol -- ls /data/mysql/etc/</span>
+<span class="n">host</span>  <span class="n">port</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  exec -it cm-pod-vol -- cat /data/mysql/etc/host</span>
+<span class="mf">127.0.0.1</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="secret">
+<h2>Secret<a class="headerlink" href="#secret" title="Link to this heading"></a></h2>
+<section id="id7">
+<h3>secret介绍<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<p>Secret与configmap类似，主要区别是ConfigMap是明文，而Secret存储的base64加密后的密文</p>
+<ul class="simple">
+<li><p>base64加密的密文，可通过<code class="docutils literal notranslate"><span class="pre">base64</span> <span class="pre">-d</span></code>进行解密</p></li>
+<li><p>常用于密码、密钥、token等敏感数据的配置管理</p></li>
+</ul>
+</section>
+<section id="id8">
+<h3>secret类型<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<p>Secret有4中类型</p>
+<ul class="simple">
+<li><p>Opaque: base64编码格式的Secret，用来存储密码、密钥、信息、证书等，类型标识符为generic</p></li>
+<li><p>Service Account： 用来访问kubernetes api，由kubernetes自动创建，并且自动挂载到Pod的/var/run/secrets/kubernetes.io/serviceaccount目录</p></li>
+<li><p>kubernetes.io/dockerconfigjson: 用来存储docker register的认证信息，类型标识符为 docker-register</p></li>
+<li><p>kubernetes/tls： 用于为SSL通信模式存储证书合私钥文件，类型标识符为tls</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  create secret -h</span>
+<span class="n">Create</span> <span class="n">a</span> <span class="n">secret</span> <span class="k">with</span> <span class="n">specified</span> <span class="nb">type</span><span class="o">.</span>
+
+ <span class="n">A</span> <span class="n">docker</span><span class="o">-</span><span class="n">registry</span> <span class="nb">type</span> <span class="n">secret</span> <span class="ow">is</span> <span class="k">for</span> <span class="n">accessing</span> <span class="n">a</span> <span class="n">container</span> <span class="n">registry</span><span class="o">.</span>
+
+ <span class="n">A</span> <span class="n">generic</span> <span class="nb">type</span> <span class="n">secret</span> <span class="n">indicate</span> <span class="n">an</span> <span class="n">Opaque</span> <span class="n">secret</span> <span class="nb">type</span><span class="o">.</span>
+
+ <span class="n">A</span> <span class="n">tls</span> <span class="nb">type</span> <span class="n">secret</span> <span class="n">holds</span> <span class="n">TLS</span> <span class="n">certificate</span> <span class="ow">and</span> <span class="n">its</span> <span class="n">associated</span> <span class="n">key</span><span class="o">.</span>
+
+<span class="n">Available</span> <span class="n">Commands</span><span class="p">:</span>
+  <span class="n">docker</span><span class="o">-</span><span class="n">registry</span>   <span class="n">创建一个给</span> <span class="n">Docker</span> <span class="n">registry</span> <span class="n">使用的</span> <span class="n">Secret</span>
+  <span class="n">generic</span>           <span class="n">Create</span> <span class="n">a</span> <span class="n">secret</span> <span class="kn">from</span> <span class="nn">a</span> <span class="n">local</span> <span class="n">file</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="ow">or</span> <span class="n">literal</span> <span class="n">value</span>
+  <span class="n">tls</span>               <span class="n">创建一个</span> <span class="n">TLS</span> <span class="n">secret</span>
+
+<span class="n">Usage</span><span class="p">:</span>
+  <span class="n">kubectl</span> <span class="n">create</span> <span class="n">secret</span> <span class="p">(</span><span class="n">docker</span><span class="o">-</span><span class="n">registry</span> <span class="o">|</span> <span class="n">generic</span> <span class="o">|</span> <span class="n">tls</span><span class="p">)</span> <span class="p">[</span><span class="n">options</span><span class="p">]</span>
+
+<span class="n">Use</span> <span class="s2">&quot;kubectl create secret &lt;command&gt; --help&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span> <span class="n">about</span> <span class="n">a</span> <span class="n">given</span> <span class="n">command</span><span class="o">.</span>
+<span class="n">Use</span> <span class="s2">&quot;kubectl options&quot;</span> <span class="k">for</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="k">global</span> <span class="n">command</span><span class="o">-</span><span class="n">line</span> <span class="n">options</span> <span class="p">(</span><span class="n">applies</span> <span class="n">to</span> <span class="nb">all</span> <span class="n">commands</span><span class="p">)</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h3>secret应用案例<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<section id="id10">
+<h4>数据库密码案例<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<p>创建数据库管理员密码Secret案例，使用Opaque类型来创建mysql密码Secret</p>
+<p>将明文进行base64编码</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 假设数据库密码为root1234 ,这里一定要使用 -n 选项，否则mysql pod会创建失败</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># echo -n root1234|base64</span>
+<span class="n">cm9vdDEyMzQ</span><span class="o">=</span>
+</pre></div>
+</div>
+<p>2.编写YAML资源清单文件</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cat secret-mysql.yaml</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Secret</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">secret</span><span class="o">-</span><span class="n">mysql</span>
+<span class="n">data</span><span class="p">:</span>
+  <span class="n">password</span><span class="p">:</span> <span class="n">cm9vdDEyMzQ</span><span class="o">=</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  apply -f mysql-secret.yaml</span>
+<span class="n">secret</span><span class="o">/</span><span class="n">secret</span><span class="o">-</span><span class="n">mysql</span> <span class="n">created</span>
+
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  describe secret/secret-mysql</span>
+<span class="n">Name</span><span class="p">:</span>         <span class="n">secret</span><span class="o">-</span><span class="n">mysql</span>
+<span class="n">Namespace</span><span class="p">:</span>    <span class="n">default</span>
+<span class="n">Labels</span><span class="p">:</span>       <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">Annotations</span><span class="p">:</span>  <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+
+<span class="n">Type</span><span class="p">:</span>  <span class="n">Opaque</span>
+
+<span class="n">Data</span>
+<span class="o">====</span>
+<span class="n">passowrd</span><span class="p">:</span>  <span class="mi">10</span> <span class="nb">bytes</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="secret2">
+<h3>secret的2种使用方式<a class="headerlink" href="#secret2" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>env：环境变量方式不支持热更新</p></li>
+<li><p>volume: 卷挂载方式支持热更新</p></li>
+</ul>
+<section id="id11">
+<h4>1.通过环境变量方式传递给Pod<a class="headerlink" href="#id11" title="Link to this heading"></a></h4>
+<p>1.编写资源清单文件使用secret-mysql</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cat secret-mysql-env.yaml</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">secret</span><span class="o">-</span><span class="n">mysql</span><span class="o">-</span><span class="n">env</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">mysql</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">mysql</span><span class="p">:</span><span class="mf">5.7</span>
+    <span class="n">env</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">MYSQL_ROOT_PASSWORD</span>
+        <span class="n">valueFrom</span><span class="p">:</span>
+          <span class="n">secretKeyRef</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">:</span> <span class="n">secret</span><span class="o">-</span><span class="n">mysql</span>
+            <span class="n">key</span><span class="p">:</span> <span class="n">password</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  apply -f secret-mysql-env.yaml</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">secret</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">env</span> <span class="n">created</span>
+</pre></div>
+</div>
+<p>2.验证pod</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  exec -it pod/secret-mysql-env -- mysql -uroot</span>
+<span class="n">ERROR</span> <span class="mi">1045</span> <span class="p">(</span><span class="mi">28000</span><span class="p">):</span> <span class="n">Access</span> <span class="n">denied</span> <span class="k">for</span> <span class="n">user</span> <span class="s1">&#39;root&#39;</span><span class="o">@</span><span class="s1">&#39;localhost&#39;</span> <span class="p">(</span><span class="n">using</span> <span class="n">password</span><span class="p">:</span> <span class="n">NO</span><span class="p">)</span>
+<span class="n">command</span> <span class="n">terminated</span> <span class="k">with</span> <span class="n">exit</span> <span class="n">code</span> <span class="mi">1</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  exec -it pod/secret-mysql-env -- mysql -uroot  -proot1234</span>
+<span class="o">...</span>
+<span class="n">Type</span> <span class="s1">&#39;help;&#39;</span> <span class="ow">or</span> <span class="s1">&#39;\h&#39;</span> <span class="k">for</span> <span class="n">help</span><span class="o">.</span> <span class="n">Type</span> <span class="s1">&#39;\c&#39;</span> <span class="n">to</span> <span class="n">clear</span> <span class="n">the</span> <span class="n">current</span> <span class="nb">input</span> <span class="n">statement</span><span class="o">.</span>
+
+<span class="n">mysql</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="volumepod">
+<h4>2.通过volume的方式挂载到Pod<a class="headerlink" href="#volumepod" title="Link to this heading"></a></h4>
+<p>1.编写资源清单文件使用secret-mysql</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cat secret-pod-vol.yaml</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">secret</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">vol</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">busybox</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">busybox</span><span class="p">:</span><span class="mf">1.20</span>
+    <span class="n">args</span><span class="p">:</span>
+    <span class="o">-</span> <span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">sh</span>
+    <span class="o">-</span> <span class="o">-</span><span class="n">c</span>
+    <span class="o">-</span> <span class="n">sleep</span> <span class="mi">3600</span>
+    <span class="n">volumeMounts</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">vol</span><span class="o">-</span><span class="n">secret</span>
+      <span class="n">mountPath</span><span class="p">:</span> <span class="s2">&quot;/opt/password&quot;</span> <span class="c1"># 挂载目录(支持热更新)，也可以使用subPath(不支持热更新)</span>
+      <span class="n">readOnly</span><span class="p">:</span> <span class="n">true</span>
+  <span class="n">volumes</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">vol</span><span class="o">-</span><span class="n">secret</span>
+    <span class="n">secret</span><span class="p">:</span>
+      <span class="n">secretName</span><span class="p">:</span> <span class="n">secret</span><span class="o">-</span><span class="n">mysql</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  apply -f secret-pod-vol.yaml</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">secret</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">vol</span> <span class="n">created</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="页脚">
+        <a href="ingress.html" class="btn btn-neutral float-left" title="kubernetes服务暴露" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; 版权所有 2024, Deng You。</p>
+  </div>
+
+  利用 <a href="https://www.sphinx-doc.org/">Sphinx</a> 构建，使用的 
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">主题</a>
+    由 <a href="https://readthedocs.org">Read the Docs</a> 开发.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

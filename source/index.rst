@@ -13,6 +13,9 @@
    kubernetes/base.md
    kubernetes/ingress.md
    kubernetes/config.md
+   kubernetes/imagemgr.md
+   kubernetes/secure.md
+   kubernetes/storage.md
 
 
 

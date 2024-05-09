@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kubernetes存储方案 &mdash; SRE运维 v0.0.1 文档</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7cf98a4c"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=beaddf03"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="prev" title="kubernetes安全机制" href="secure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SRE运维
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="搜索文档" aria-label="搜索文档" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
+              <p class="caption" role="heading"><span class="caption-text">云原生</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">kubernetes介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id1">kubernetes架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id2">Kubernetes部署</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id10">kubernetes客户端</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id14">Kubernetes节点管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id26">kubernetes核心概念</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id27">kubernetes工作负载</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id42">kubernetes网络</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id48">kubernetes自动伸缩</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ingress.html">kubernetes服务暴露</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">kubernetes配置与密钥管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imagemgr.html">kubernetes镜像管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="secure.html">kubernetes安全机制</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kubernetes存储方案</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">kubernetes存储卷</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id2">本地存储卷</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#emptydir">emptyDir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hostpath">hostPath</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nfs">网络存储卷NFS</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">搭建NFS服务</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">使用NFS存储</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pvpvc">持久卷PV和声明PVC</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nfspvpvc">实现NFS类型的PV与PVC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#subpathnfs">subPath自动创建NFS目录</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#storageclass">存储类StorageClass</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">基于NFS实现动态供给</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="移动版导航菜单" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SRE运维</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="页面导航">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">kubernetes存储方案</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kubernetes/storage.md.txt" rel="nofollow"> 查看页面源码</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="kubernetes">
+<h1>kubernetes存储方案<a class="headerlink" href="#kubernetes" title="Link to this heading"></a></h1>
+<section id="id1">
+<h2>kubernetes存储卷<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/storage/volumes/">官网</a> :<code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/storage/volumes/</span></code></p>
+</div></blockquote>
+<p>Pod有生命周期，生命周期结束后，或者Pod被销毁然后调度到其它节点上，那么Pod里面的数据(如配置文件、业务数据等)就会丢失，这是我们不想看到得，于是为了解决Pod与数据持久化问题，kubernetes使用分离得方式提供持久存储给Pod使用，这就是存储卷。</p>
+<ul class="simple">
+<li><p>数据与pod分离</p></li>
+<li><p>容器挂载volume</p></li>
+</ul>
+<p><img alt="../_images/vol01.png" src="../_images/vol01.png" />
+<strong>存储卷分类</strong></p>
+<p>通过官网，可以看出kubernetes支持众多的存储卷，这些卷可以进行简单分类：</p>
+<ul class="simple">
+<li><p>本地存储卷</p>
+<ul>
+<li><p>emptyDir: pod删除，书也会被清楚，常用于临时存储数据或Pod内容器共享数据</p></li>
+<li><p>hostPath：宿主机目录映射(本地存储卷)</p></li>
+</ul>
+</li>
+<li><p>网络存储卷</p>
+<ul>
+<li><p>NAS</p>
+<ul>
+<li><p>nfs</p></li>
+</ul>
+</li>
+<li><p>SAN</p>
+<ul>
+<li><p>iscsi</p></li>
+<li><p>FC</p></li>
+</ul>
+</li>
+<li><p>分布式存储</p>
+<ul>
+<li><p>glusterfs</p></li>
+<li><p>ceph</p></li>
+</ul>
+</li>
+<li><p>云存储</p>
+<ul>
+<li><p>aws</p></li>
+<li><p>azurefile</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>存储卷选择</strong></p>
+<p>市面上的存储产品种类繁多，但是按应用角度主要非为三类</p>
+<ul class="simple">
+<li><p>文件存储：nfs，glusterfs， cephfs</p>
+<ul>
+<li><p>优点：数据共享，多个pod可以同读同写</p></li>
+<li><p>缺点：性能较差</p></li>
+</ul>
+</li>
+<li><p>块存储： iscsi， rbd</p>
+<ul>
+<li><p>优点：性能对比文件存储要好</p></li>
+<li><p>缺点： 对于某些块存储数据不共享</p></li>
+</ul>
+</li>
+<li><p>对象存储： ceph 对象存储</p>
+<ul>
+<li><p>优点：性能好，数据共享</p></li>
+<li><p>缺点：使用方式特殊，支持较少</p></li>
+</ul>
+</li>
+</ul>
+<p>面对kubernetes支持形形色色的存储卷，我们在选择存储卷时需要抓住核心需求：</p>
+<ul class="simple">
+<li><p>数据是否要持久化</p></li>
+<li><p>数据可靠性，能否允许单点故障</p></li>
+<li><p>性能</p></li>
+<li><p>扩展性，是否方便快速扩容</p></li>
+<li><p>运维难度，尽量选择稳定的开源或者商业产品</p></li>
+<li><p>成本</p></li>
+</ul>
+<section id="id2">
+<h3>本地存储卷<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<section id="emptydir">
+<h4>emptyDir<a class="headerlink" href="#emptydir" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>应用场景：实现pod内容器数据共享</p></li>
+<li><p>特点：pod消失，数据也会被删除</p></li>
+</ul>
+<p>1.创建Pod</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">volumes</span><span class="p">]</span><span class="c1"># cat vol-pod-emptydir.yaml </span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">vol</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">emptydir</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">write</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">busybox</span><span class="p">:</span><span class="mf">1.28</span>
+    <span class="n">command</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;sh&#39;</span><span class="p">,</span> <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;while true;do echo $(date +</span><span class="si">%F</span><span class="s2">_%H:%M:%S) &gt;&gt; /data/data.html； sleep 3;done&quot;</span><span class="p">]</span>
+    <span class="n">volumeMounts</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">share</span><span class="o">-</span><span class="n">vol</span>
+      <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">data</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">read</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span><span class="o">-</span><span class="n">alpine</span>
+    <span class="n">volumeMounts</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">share</span><span class="o">-</span><span class="n">vol</span>
+      <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span>
+  <span class="n">volumes</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">share</span><span class="o">-</span><span class="n">vol</span>
+    <span class="n">emptyDir</span><span class="p">:</span> <span class="p">{}</span>
+
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">volumes</span><span class="p">]</span><span class="c1"># kubectl  apply -f vol-pod-emptydir.yaml</span>
+</pre></div>
+</div>
+<p>2.验证Pod</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>volumes<span class="o">]</span><span class="c1"># kubectl  get pod -o wide</span>
+NAME<span class="w">               </span>READY<span class="w">   </span>STATUS<span class="w">    </span>RESTARTS<span class="w">   </span>AGE<span class="w">   </span>IP<span class="w">              </span>NODE<span class="w">            </span>NOMINATED<span class="w"> </span>NODE<span class="w">   </span>READINESS<span class="w"> </span>GATES
+vol-pod-emptydir<span class="w">   </span><span class="m">2</span>/2<span class="w">     </span>Running<span class="w">   </span><span class="m">0</span><span class="w">          </span>8s<span class="w">    </span><span class="m">10</span>.244.36.210<span class="w">   </span>k8s-worker-01<span class="w">   </span>&lt;none&gt;<span class="w">           </span>&lt;none&gt;
+<span class="o">[</span>root@k8s-master-01<span class="w"> </span>volumes<span class="o">]</span><span class="c1"># curl 10.244.36.210/data.html</span>
+<span class="m">2024</span>-05-09_02:01:20
+<span class="m">2024</span>-05-09_02:01:23
+<span class="m">2024</span>-05-09_02:01:26
+<span class="m">2024</span>-05-09_02:01:29
+<span class="m">2024</span>-05-09_02:01:32
+</pre></div>
+</div>
+</section>
+<section id="hostpath">
+<h4>hostPath<a class="headerlink" href="#hostpath" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>应用场景：pod数据保存到集群节点路径</p></li>
+<li><p>缺点：pod调度到其它机器后，数据会丢失，可以通过绑定到固定节点的方式解决这个问题,无法实现数据共享</p></li>
+</ul>
+<p>1.创建Pod</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="n">vol</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">hostPath</span><span class="o">.</span><span class="n">yaml</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Pod</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">vol</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">hostpath</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">containers</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span><span class="o">-</span><span class="n">alpine</span>
+    <span class="n">volumeMounts</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">html</span>
+      <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span>
+  <span class="n">volumes</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">html</span>
+    <span class="n">hostPath</span><span class="p">:</span>
+      <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">opt</span>  <span class="c1"># 目录需要在机器上存在</span>
+      <span class="nb">type</span><span class="p">:</span> <span class="n">Directory</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="nfs">
+<h3>网络存储卷NFS<a class="headerlink" href="#nfs" title="Link to this heading"></a></h3>
+<section id="id3">
+<h4>搭建NFS服务<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<p>推荐使用集群外的单独的机器搭建nfs服务</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span>
+<span class="n">yum</span> <span class="n">install</span> <span class="n">nfs</span><span class="o">-</span><span class="n">utils</span> <span class="o">-</span><span class="n">y</span>
+<span class="n">echo</span> <span class="s2">&quot;/data/nfs       *(rw,no_root_squash,sync)&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">exports</span>
+<span class="n">systemctl</span>  <span class="n">enable</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span> <span class="o">--</span><span class="n">now</span>
+</pre></div>
+</div>
+<p>所有的集群节点安装nfs客户端，以便k8s节点挂载nfs卷</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">yum</span> <span class="n">install</span> <span class="n">nfs</span><span class="o">-</span><span class="n">utils</span> <span class="o">-</span><span class="n">y</span>
+
+<span class="c1"># 验证nfs的可用性</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># showmount -e 10.4.111.141</span>
+<span class="n">Export</span> <span class="nb">list</span> <span class="k">for</span> <span class="mf">10.4.111.141</span><span class="p">:</span>
+<span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span> <span class="o">*</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h4>使用NFS存储<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<p>1.创建Deployment使用nfs</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">volumes</span><span class="p">]</span><span class="c1"># cat vol-deploy-nginx-nfs.yaml</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">3</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span><span class="o">-</span><span class="n">alpine</span>
+        <span class="n">volumeMounts</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nfs</span><span class="o">-</span><span class="n">data</span>
+          <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span>
+      <span class="n">volumes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nfs</span><span class="o">-</span><span class="n">data</span>
+        <span class="n">nfs</span><span class="p">:</span>
+          <span class="n">server</span><span class="p">:</span> <span class="mf">10.4.111.141</span>
+          <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">volumes</span><span class="p">]</span><span class="c1"># kubectl  apply -f vol-deploy-nginx-nfs.yaml</span>
+<span class="n">deployment</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">nginx</span> <span class="n">created</span>
+</pre></div>
+</div>
+<p>2.验证数据共享</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 在nfs机器上执行</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># echo &quot;this is nfs data.&quot; &gt; /data/nfs/index.html </span>
+<span class="c1"># 通过pod IP访问nfs数据</span>
+<span class="n">volumes</span><span class="p">]</span><span class="c1"># kubectl  get pod -o wide</span>
+<span class="n">NAME</span>                     <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>     <span class="n">IP</span>              <span class="n">NODE</span>            <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">7</span><span class="n">fdbcfb5b4</span><span class="o">-</span><span class="n">c92q6</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="n">m14s</span>   <span class="mf">10.244.36.211</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">7</span><span class="n">fdbcfb5b4</span><span class="o">-</span><span class="n">dr59z</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="n">m14s</span>   <span class="mf">10.244.118.82</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">7</span><span class="n">fdbcfb5b4</span><span class="o">-</span><span class="n">s5jmh</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="n">m14s</span>   <span class="mf">10.244.7.150</span>    <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">volumes</span><span class="p">]</span><span class="c1"># curl 10.244.36.211</span>
+<span class="n">this</span> <span class="ow">is</span> <span class="n">nfs</span> <span class="n">data</span><span class="o">.</span>
+<span class="n">volumes</span><span class="p">]</span><span class="c1"># curl 10.244.118.82</span>
+<span class="n">this</span> <span class="ow">is</span> <span class="n">nfs</span> <span class="n">data</span><span class="o">.</span>
+<span class="n">volumes</span><span class="p">]</span><span class="c1"># curl 10.244.7.150</span>
+<span class="n">this</span> <span class="ow">is</span> <span class="n">nfs</span> <span class="n">data</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="pvpvc">
+<h2>持久卷PV和声明PVC<a class="headerlink" href="#pvpvc" title="Link to this heading"></a></h2>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes/</span></code></p>
+</div></blockquote>
+<p>kubernetes的存储卷太丰富了，每周类型需要写相应接口和参数才能使用，这就让维护和管理难度加大，为了解决这种问题，kubernetes引入了pv和pvc的概念，从而用户不需要了解底层存储卷的实现细节，就可以使用任意类型的存储卷了，真正实现”存储和管理分离”。</p>
+<p><img alt="../_images/vol01.png" src="../_images/vol01.png" /></p>
+<ul class="simple">
+<li><p>PersistentVolume(PV): 持久卷，定义存储卷的大小，类型</p>
+<ul>
+<li><p>生产者</p>
+<ul>
+<li><p>提供存储资源</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>PersistentVolumeClaim: 持久卷声明，定义持久卷如何使用</p>
+<ul>
+<li><p>消费者</p>
+<ul>
+<li><p>绑定存储</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><img alt="../_images/vol03.png" src="../_images/vol03.png" /></p>
+<section id="nfspvpvc">
+<h3>实现NFS类型的PV与PVC<a class="headerlink" href="#nfspvpvc" title="Link to this heading"></a></h3>
+<p>前提：准备好NFS服务器</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># showmount  -e 10.4.111.141</span>
+<span class="n">Export</span> <span class="nb">list</span> <span class="k">for</span> <span class="mf">10.4.111.141</span><span class="p">:</span>
+<span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>1.编写YAML文件创建PV</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nfs</span><span class="p">]</span><span class="c1"># cat pv.yaml </span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">PersistentVolume</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">pv</span><span class="o">-</span><span class="n">nfs</span> <span class="c1"># PV是集群资源类型的资源，不需要定义namespace</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">capacity</span><span class="p">:</span>
+    <span class="n">storage</span><span class="p">:</span> <span class="mi">1</span><span class="n">Gi</span>  <span class="c1"># 定义存储资源的大小</span>
+  <span class="n">accessModes</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">ReadWriteMany</span>  <span class="c1"># 访问模式</span>
+  <span class="n">nfs</span><span class="p">:</span>
+   <span class="n">server</span><span class="p">:</span> <span class="mf">10.4.111.141</span>
+   <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span><span class="o">/</span><span class="n">pv1</span> <span class="c1"># 此路径如果是nfs的子路径，则需要在nfs服务器上存在，否则创建pod会失败</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  apply -f pv.yaml</span>
+
+ <span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get pv -o wide</span>
+<span class="n">NAME</span>     <span class="n">CAPACITY</span>   <span class="n">ACCESS</span> <span class="n">MODES</span>   <span class="n">RECLAIM</span> <span class="n">POLICY</span>   <span class="n">STATUS</span>      <span class="n">CLAIM</span>   <span class="n">STORAGECLASS</span>   <span class="n">REASON</span>   <span class="n">AGE</span>     <span class="n">VOLUMEMODE</span>
+<span class="n">pv</span><span class="o">-</span><span class="n">nfs</span>   <span class="mi">1</span><span class="n">Gi</span>        <span class="n">RWX</span>            <span class="n">Retain</span>           <span class="n">Available</span>                                   <span class="mi">7</span><span class="n">m21s</span>   <span class="n">Filesystem</span> 
+</pre></div>
+</div>
+<p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/storage/persistent-volumes/#access-modes">访问模式</a>
+有三种</p>
+<ul class="simple">
+<li><p>ReadWriteOnce: 卷可以被一个节点以读写方式挂载,简写RWO</p></li>
+<li><p>ReadOnlyMany: 卷可以被多个节点以只读方式挂载，简写ROX</p></li>
+<li><p>ReadWriteMany: 卷可以被多个节点以读写方式挂载，简写RWO</p></li>
+</ul>
+<p>cephfs存储卷三种模式都支持，如果要实现快捷带你之间共享数据应该使用 ReadWriteMany模式</p>
+<p>2.编写YAML文件创建PVC</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nfs</span><span class="p">]</span><span class="c1"># cat pvc-nfs.yaml </span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">PersistentVolumeClaim</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">pvc</span><span class="o">-</span><span class="n">nfs</span>
+  <span class="n">namespace</span><span class="p">:</span>  <span class="n">test</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">accessModes</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">ReadWriteMany</span>
+  <span class="n">resources</span><span class="p">:</span>
+    <span class="n">requests</span><span class="p">:</span>
+      <span class="n">storage</span><span class="p">:</span> <span class="mi">1</span><span class="n">Gi</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl apply -f  pvc-nfs.yaml</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get pvc -n test</span>
+<span class="n">NAME</span>      <span class="n">STATUS</span>   <span class="n">VOLUME</span>   <span class="n">CAPACITY</span>   <span class="n">ACCESS</span> <span class="n">MODES</span>   <span class="n">STORAGECLASS</span>   <span class="n">AGE</span>
+<span class="n">pvc</span><span class="o">-</span><span class="n">nfs</span>   <span class="n">Bound</span>    <span class="n">pv</span><span class="o">-</span><span class="n">nfs</span>   <span class="mi">1</span><span class="n">Gi</span>        <span class="n">RWX</span>                           <span class="mi">6</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>3.编写Deploy使用PVC的YAML资源</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nfs</span><span class="p">]</span><span class="c1"># cat deploy-pvc-nginx.yaml </span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">3</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span><span class="o">-</span><span class="n">alpine</span>
+        <span class="n">volumeMounts</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">html</span>
+          <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span>
+      <span class="n">volumes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">html</span>
+        <span class="n">persistentVolumeClaim</span><span class="p">:</span>
+          <span class="n">claimName</span><span class="p">:</span> <span class="n">pvc</span><span class="o">-</span><span class="n">nfs</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl apply -f deploy-pvc-nginx.yaml</span>
+</pre></div>
+</div>
+<p>4.验证</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 在nfs服务器中提供数据</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># echo &quot;this is pv1 on nfs server.&quot; &gt; /data/nfs/pv1/index.html</span>
+
+<span class="c1"># 通过PodIP访问数据</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get pod -n test -o wide</span>
+<span class="n">NAME</span>                     <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>     <span class="n">IP</span>              <span class="n">NODE</span>            <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">66958</span><span class="n">bf88f</span><span class="o">-</span><span class="n">b94k7</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="n">m14s</span>   <span class="mf">10.244.36.213</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">66958</span><span class="n">bf88f</span><span class="o">-</span><span class="n">nprmv</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="n">m14s</span>   <span class="mf">10.244.7.152</span>    <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">66958</span><span class="n">bf88f</span><span class="o">-</span><span class="n">wzflp</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">4</span><span class="n">m14s</span>   <span class="mf">10.244.118.84</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># curl 10.244.7.152</span>
+<span class="n">this</span> <span class="ow">is</span> <span class="n">pv1</span> <span class="n">on</span> <span class="n">nfs</span> <span class="n">server</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="subpathnfs">
+<h3>subPath自动创建NFS目录<a class="headerlink" href="#subpathnfs" title="Link to this heading"></a></h3>
+<p>1.创建YAML资源清单</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">nfs</span><span class="p">]</span><span class="c1"># cat all-nfs-subpath.yaml </span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">PersistentVolume</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">pv</span><span class="o">-</span><span class="n">nfs</span><span class="o">-</span><span class="mi">2</span> <span class="c1"># PV是集群资源类型的资源，不需要定义namespace</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">capacity</span><span class="p">:</span>
+    <span class="n">storage</span><span class="p">:</span> <span class="mi">1</span><span class="n">Gi</span>  <span class="c1"># 定义存储资源的大小</span>
+  <span class="n">accessModes</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">ReadWriteMany</span>  <span class="c1"># 访问模式</span>
+  <span class="n">nfs</span><span class="p">:</span>
+   <span class="n">server</span><span class="p">:</span> <span class="mf">10.4.111.141</span>
+   <span class="n">path</span><span class="p">:</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span><span class="o">/</span>  <span class="c1"># nfs导出目录</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">PersistentVolumeClaim</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">pvc</span><span class="o">-</span><span class="n">nfs</span><span class="o">-</span><span class="mi">2</span>
+  <span class="n">namespace</span><span class="p">:</span>  <span class="n">test</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">accessModes</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">ReadWriteMany</span>
+  <span class="n">resources</span><span class="p">:</span>
+    <span class="n">requests</span><span class="p">:</span>
+      <span class="n">storage</span><span class="p">:</span> <span class="mi">1</span><span class="n">Gi</span>
+
+  
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">test</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">3</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span><span class="o">-</span><span class="n">alpine</span>
+        <span class="n">volumeMounts</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">html</span>
+          <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">nginx</span><span class="o">/</span><span class="n">html</span> 
+          <span class="n">subPath</span><span class="p">:</span> <span class="n">html</span> <span class="c1"># 使用subPath会自动在nfs server共享出来的/data/nfs/目录下自动创建html目录</span>
+      <span class="n">volumes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">html</span>
+        <span class="n">persistentVolumeClaim</span><span class="p">:</span>
+          <span class="n">claimName</span><span class="p">:</span> <span class="n">pvc</span><span class="o">-</span><span class="n">nfs</span><span class="o">-</span><span class="mi">2</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  apply -f all-nfs-subpath.yaml</span>
+</pre></div>
+</div>
+<p>2.验证</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. nfs服务器创建文件</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># echo &quot;this is subpath create dir.&quot; &gt;  /data/nfs/html/index.html</span>
+
+<span class="c1"># 2. 通过podip访问</span>
+<span class="n">nfs</span><span class="p">]</span><span class="c1"># kubectl  get pod -n test -o wide</span>
+<span class="n">NAME</span>                     <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>   <span class="n">IP</span>              <span class="n">NODE</span>            <span class="n">NOMINATED</span> <span class="n">NODE</span>   <span class="n">READINESS</span> <span class="n">GATES</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">59</span><span class="n">b8d74b6c</span><span class="o">-</span><span class="mi">9</span><span class="n">nhk7</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">67</span><span class="n">m</span>   <span class="mf">10.244.118.85</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">02</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">59</span><span class="n">b8d74b6c</span><span class="o">-</span><span class="n">bqjvg</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">67</span><span class="n">m</span>   <span class="mf">10.244.7.153</span>    <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">03</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="n">nginx</span><span class="o">-</span><span class="mi">59</span><span class="n">b8d74b6c</span><span class="o">-</span><span class="n">fzjx8</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">67</span><span class="n">m</span>   <span class="mf">10.244.36.214</span>   <span class="n">k8s</span><span class="o">-</span><span class="n">worker</span><span class="o">-</span><span class="mi">01</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>           <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="n">nfs</span><span class="p">]</span><span class="c1"># curl 10.244.36.214</span>
+<span class="n">this</span> <span class="ow">is</span> <span class="n">subpath</span> <span class="n">create</span> <span class="nb">dir</span><span class="o">.</span>
+</pre></div>
+</div>
+</section>
+<section id="storageclass">
+<h3>存储类StorageClass<a class="headerlink" href="#storageclass" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/storage/storage-classes/#nfs">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/concepts/storage/storage-classes/#nfs</span></code></p>
+</div></blockquote>
+<p>每次使用存储时，需要预先创建存储，然后通过PVC来声明存储的使用，这样的工作比较繁琐，有没有简单高效的办法使用存储呢？答案是有的，Kubernetes v1.4版本引入一个新的资源对象 StorageClass 存储类，用户无需预先创建存储，而是在使用时，通过PVC自动向存储类按需自动创建PV。</p>
+<section id="id5">
+<h4>基于NFS实现动态供给<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<p>PV对存储系统的支持可以通过插件支持，目前kubernetes支持如下类型的<a class="reference external" href="https://kubernetes.io/zh-cn/docs/concepts/storage/storage-classes/">插件</a>
+<img alt="../_images/vol04.png" src="../_images/vol04.png" /></p>
+<p>官网的插件是不支持NFS动态供给的，但是可以i通过第三方插件实现。
+第三方插件的访问地址：</p>
+<ol class="simple">
+<li><p>创建nfs服务</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 建议使用集群外的单独的一台机器提供nfs服务</span>
+<span class="n">mkdir</span> <span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span>
+<span class="n">yum</span> <span class="n">install</span> <span class="n">nfs</span><span class="o">-</span><span class="n">utils</span> <span class="o">-</span><span class="n">y</span>
+<span class="n">echo</span> <span class="s2">&quot;/data/nfs       *(rw,no_root_squash,sync)&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">exports</span>
+<span class="n">systemctl</span>  <span class="n">enable</span> <span class="n">nfs</span><span class="o">-</span><span class="n">server</span> <span class="o">--</span><span class="n">now</span>
+
+
+<span class="c1"># 所有的集群节点安装nfs客户端，以便k8s节点挂载nfs卷</span>
+<span class="n">yum</span> <span class="n">install</span> <span class="n">nfs</span><span class="o">-</span><span class="n">utils</span> <span class="o">-</span><span class="n">y</span>
+
+<span class="c1"># 验证nfs的可用性</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># showmount -e 10.4.111.141</span>
+<span class="n">Export</span> <span class="nb">list</span> <span class="k">for</span> <span class="mf">10.4.111.141</span><span class="p">:</span>
+<span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">nfs</span> <span class="o">*</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="页脚">
+        <a href="secure.html" class="btn btn-neutral float-left" title="kubernetes安全机制" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; 版权所有 2024, Deng You。</p>
+  </div>
+
+  利用 <a href="https://www.sphinx-doc.org/">Sphinx</a> 构建，使用的 
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">主题</a>
+    由 <a href="https://readthedocs.org">Read the Docs</a> 开发.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

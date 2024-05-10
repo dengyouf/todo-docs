@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="zh-CN" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kubernetes包管理器 &mdash; SRE运维 v0.0.1 文档</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=7cf98a4c"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/translations.js?v=beaddf03"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="prev" title="kubernetes存储方案" href="storage.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            SRE运维
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="搜索文档" aria-label="搜索文档" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="导航菜单">
+              <p class="caption" role="heading"><span class="caption-text">云原生</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">kubernetes介绍</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id1">kubernetes架构</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id2">Kubernetes部署</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id10">kubernetes客户端</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id14">Kubernetes节点管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id26">kubernetes核心概念</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id27">kubernetes工作负载</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id42">kubernetes网络</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html#id48">kubernetes自动伸缩</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ingress.html">kubernetes服务暴露</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">kubernetes配置与密钥管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="imagemgr.html">kubernetes镜像管理</a></li>
+<li class="toctree-l1"><a class="reference internal" href="secure.html">kubernetes安全机制</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">kubernetes存储方案</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kubernetes包管理器</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#helmv3">HelmV3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#helm">Helm介绍</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Helm架构</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Helm安装</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Helm命令</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Helm使用</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mysql">1.在线方式部署MySQL</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">2.定制参数</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">3.升级和回滚</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#charts">Charts开发</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id9">1.Charts目录结构</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">2.Charts预定义变量</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#chart">3.开发Chart</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Chart包托管</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#push">1.安装push插件</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12">2.打包应用</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#harborhelm">3.添加harbor为helm仓库</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#chartsharbor">4.推送charts到Harbor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13">5.使用charts</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="移动版导航菜单" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SRE运维</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="页面导航">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">kubernetes包管理器</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/kubernetes/helm.md.txt" rel="nofollow"> 查看页面源码</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="kubernetes">
+<h1>kubernetes包管理器<a class="headerlink" href="#kubernetes" title="Link to this heading"></a></h1>
+<section id="helmv3">
+<h2>HelmV3<a class="headerlink" href="#helmv3" title="Link to this heading"></a></h2>
+<section id="helm">
+<h3>Helm介绍<a class="headerlink" href="#helm" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://helm.sh/zh/docs/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://helm.sh/zh/docs/</span></code></p>
+</div></blockquote>
+<p>当今软件开发，随着云原生技术得普及，我们的工程应用进行微服务和容器化的现象也越来越普遍。kubernetes 几乎成为了云原生服务编排绕不开的标准和技术。为了部署一个项目，我们需要多个清单如Deploy、Service、PV、PVC等定义资源如何运行，如何访问等。这是我们就需要有一个工具，高效的对这些资源进行整体管理，并且可以通过简单的修改进行高效复用。而Helm 就是这样的工具，有了Helm，我们可以像在linux中使用yum管理包工具一样，方便快捷的安装、管理、卸载k8s应用，高效的管理YAML资源清单集合，并可以通过配置一些简单的参数对资源进行复用。</p>
+<p><img alt="../_images/helm00.png" src="../_images/helm00.png" /></p>
+</section>
+<section id="id1">
+<h3>Helm架构<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Helm 基于go语言模板，用户只要提供规定的目录结构和模板文件，在真正部署时Helm模板引擎可以将其渲染成可用的k8s资源清单文件，并安装正确的顺序将他们部署到kubernetes集群中。</p>
+<p><img alt="../_images/helm01.png" src="../_images/helm01.png" /></p>
+<ul class="simple">
+<li><p>Charts：helm 包通过Chart格式来描述应用，类似于rpm包</p></li>
+<li><p>Repository：用来存放和共享Chart的地方，类似于yum仓库</p></li>
+<li><p>Release：：运行在kubernetes集群内的实例</p></li>
+</ul>
+<p>Helm 作为k8s包管理软件，每次安装Charts到k8s集群时，helm  client 查找repository或者使用版本的Charts使用REST+JSON的方式与API Server进行交互，进而管理deployment、service等资源，在k8s中会创建一个release。</p>
+</section>
+<section id="id2">
+<h3>Helm安装<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># wget https://get.helm.sh/helm-v3.10.3-linux-amd64.tar.gz</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># tar -xf helm-v3.10.3-linux-amd64.tar.gz </span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># mv linux-amd64/helm /usr/local/bin/</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># helm version</span>
+<span class="n">version</span><span class="o">.</span><span class="n">BuildInfo</span><span class="p">{</span><span class="n">Version</span><span class="p">:</span><span class="s2">&quot;v3.10.3&quot;</span><span class="p">,</span> <span class="n">GitCommit</span><span class="p">:</span><span class="s2">&quot;835b7334cfe2e5e27870ab3ed4135f136eecc704&quot;</span><span class="p">,</span> <span class="n">GitTreeState</span><span class="p">:</span><span class="s2">&quot;clean&quot;</span><span class="p">,</span> <span class="n">GoVersion</span><span class="p">:</span><span class="s2">&quot;go1.18.9&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="id3">
+<h3>Helm命令<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<p>1.Helm 常见命令</p>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th><strong>命令</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>create</td>
+<td>创建一个chart并指定名字</td>
+</tr>
+<tr>
+<td>dependency</td>
+<td>管理chart依赖</td>
+</tr>
+<tr>
+<td>get</td>
+<td>下载一个release。可用子命令：all、hooks、manifest、notes、values</td>
+</tr>
+<tr>
+<td>history</td>
+<td>获取release历史</td>
+</tr>
+<tr>
+<td>install</td>
+<td>安装一个chart</td>
+</tr>
+<tr>
+<td>list</td>
+<td>列出release</td>
+</tr>
+<tr>
+<td>package</td>
+<td>将chart目录打包到chart存档文件中</td>
+</tr>
+<tr>
+<td>pull</td>
+<td>从远程仓库中下载chart并解压到本地  # helm pull stable/mysql --untar</td>
+</tr>
+<tr>
+<td>repo</td>
+<td>添加，列出，移除，更新和索引chart仓库。可用子命令：add、index、list、remove、update</td>
+</tr>
+<tr>
+<td>rollback</td>
+<td>从之前版本回滚</td>
+</tr>
+<tr>
+<td>search</td>
+<td>根据关键字搜索chart。可用子命令：hub、repo</td>
+</tr>
+<tr>
+<td>show</td>
+<td>查看chart详细信息。可用子命令：all、chart、readme、values</td>
+</tr>
+<tr>
+<td>status</td>
+<td>显示已命名版本的状态</td>
+</tr>
+<tr>
+<td>template</td>
+<td>本地呈现模板</td>
+</tr>
+<tr>
+<td>uninstall</td>
+<td>卸载一个release</td>
+</tr>
+<tr>
+<td>upgrade</td>
+<td>更新一个release</td>
+</tr>
+<tr>
+<td>version</td>
+<td>查看helm客户端版本</td>
+</tr>
+</tbody>
+</table><p>2、配置国内Chart仓库</p>
+<ul class="simple">
+<li><p>微软仓库（http://mirror.azure.cn/kubernetes/charts/）这个仓库强烈推荐，基本上官网有的chart这里都有。</p></li>
+<li><p>阿里云仓库（https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts  ）</p></li>
+<li><p>官方仓库（https://hub.kubeapps.com/charts/incubator）官方chart仓库，国内有点不好使</p></li>
+<li><p>bitnami： https://charts.bitnami.com/bitnami</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">添加存储库</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># helm repo add stable http://mirror.azure.cn/kubernetes/charts</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># helm repo add aliyun https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts </span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># helm repo add bitnami https://charts.bitnami.com/bitnami</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># helm repo update</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">查看配置的存储库</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># helm repo list </span>
+<span class="n">NAME</span>    <span class="n">URL</span>                                                   
+<span class="n">stable</span>  <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">mirror</span><span class="o">.</span><span class="n">azure</span><span class="o">.</span><span class="n">cn</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">/</span><span class="n">charts</span>              
+<span class="n">aliyun</span>  <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">kubernetes</span><span class="o">.</span><span class="n">oss</span><span class="o">-</span><span class="n">cn</span><span class="o">-</span><span class="n">hangzhou</span><span class="o">.</span><span class="n">aliyuncs</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">charts</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># helm  search  repo  aliyun</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span> <span class="n">删除存储库</span>
+<span class="n">helm</span> <span class="n">repo</span> <span class="n">remove</span> <span class="n">aliyun</span>
+</pre></div>
+</div>
+</section>
+<section id="id4">
+<h3>Helm使用<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<section id="mysql">
+<h4>1.在线方式部署MySQL<a class="headerlink" href="#mysql" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>搜索charts</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># helm search repo mysql</span>
+<span class="n">NAME</span>                                    <span class="n">CHART</span> <span class="n">VERSION</span>   <span class="n">APP</span> <span class="n">VERSION</span>     <span class="n">DESCRIPTION</span>                                       
+<span class="n">aliyun</span><span class="o">/</span><span class="n">mysql</span>                            <span class="mf">0.3.5</span>                           <span class="n">Fast</span><span class="p">,</span> <span class="n">reliable</span><span class="p">,</span> <span class="n">scalable</span><span class="p">,</span> <span class="ow">and</span> <span class="n">easy</span> <span class="n">to</span> <span class="n">use</span> <span class="nb">open</span><span class="o">-...</span>
+<span class="n">bitnami</span><span class="o">/</span><span class="n">mysql</span>                           <span class="mf">10.2.2</span>          <span class="mf">8.0.37</span>          <span class="n">MySQL</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">fast</span><span class="p">,</span> <span class="n">reliable</span><span class="p">,</span> <span class="n">scalable</span><span class="p">,</span> <span class="ow">and</span> <span class="n">easy</span> <span class="n">t</span><span class="o">...</span>
+<span class="n">stable</span><span class="o">/</span><span class="n">mysql</span>                            <span class="mf">1.6.9</span>           <span class="mf">5.7.30</span>          <span class="n">DEPRECATED</span> <span class="o">-</span> <span class="n">Fast</span><span class="p">,</span> <span class="n">reliable</span><span class="p">,</span> <span class="n">scalable</span><span class="p">,</span> <span class="ow">and</span> <span class="n">easy</span><span class="o">...</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>查看charts</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">show</span> <span class="n">values</span> <span class="n">stable</span><span class="o">/</span><span class="n">mysql</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>部署charts</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~]# helm install stable/mysql --generate-name   --set persistence.storageClass=nfs-client  --set mysqlRootPassword=rootpwd123 
+NAME: mysql-1715325658
+LAST DEPLOYED: Fri May 10 15:21:00 2024
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+MySQL can be accessed via port 3306 on the following DNS name from within your cluster:
+mysql-1715325658.default.svc.cluster.local
+
+To get your root password run:
+
+    MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default mysql-1715325658 -o jsonpath=&quot;{.data.mysql-root-password}&quot; | base64 --decode; echo)
+
+To connect to your database:
+
+1. Run an Ubuntu pod that you can use as a client:
+
+    kubectl run -i --tty ubuntu --image=ubuntu:16.04 --restart=Never -- bash -il
+
+2. Install the mysql client:
+
+    $ apt-get update &amp;&amp; apt-get install mysql-client -y
+
+3. Connect using the mysql cli, then provide your password:
+    $ mysql -h mysql-1715325658 -p
+
+To connect to your database directly from outside the K8s cluster:
+    MYSQL_HOST=127.0.0.1
+    MYSQL_PORT=3306
+
+    # Execute the following command to route the connection:
+    kubectl port-forward svc/mysql-1715325658 3306
+
+    mysql -h ${MYSQL_HOST} -P${MYSQL_PORT} -u root -p${MYSQL_ROOT_PASSWORD}
+</pre></div>
+</div>
+<blockquote>
+<div><p>一个 chart 包是可以多次安装到同一个集群中的，每次安装都会产生一个release, 每个release都可以独立管理和升级</p>
+</div></blockquote>
+<ul class="simple">
+<li><p>查看release状态</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># helm list</span>
+<span class="n">NAME</span>                    <span class="n">NAMESPACE</span>       <span class="n">REVISION</span>        <span class="n">UPDATED</span>                                 <span class="n">STATUS</span>          <span class="n">CHART</span>           <span class="n">APP</span> <span class="n">VERSION</span>
+<span class="n">mysql</span><span class="o">-</span><span class="mi">1715325658</span>        <span class="n">default</span>         <span class="mi">1</span>               <span class="mi">2024</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">10</span> <span class="mi">15</span><span class="p">:</span><span class="mi">21</span><span class="p">:</span><span class="mf">00.090494201</span> <span class="o">+</span><span class="mi">0800</span> <span class="n">CST</span> <span class="n">deployed</span>        <span class="n">mysql</span><span class="o">-</span><span class="mf">1.6.9</span>     <span class="mf">5.7.30</span>     
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get pod</span>
+<span class="n">NAME</span>                                      <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>      <span class="n">AGE</span>
+<span class="n">mysql</span><span class="o">-</span><span class="mi">1715325658</span><span class="o">-</span><span class="mi">7</span><span class="n">b754bdfc8</span><span class="o">-</span><span class="n">v72wd</span>         <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>             <span class="mi">3</span><span class="n">m15s</span>
+<span class="n">nfs</span><span class="o">-</span><span class="n">client</span><span class="o">-</span><span class="n">provisioner</span><span class="o">-</span><span class="mi">685</span><span class="n">df7bcc5</span><span class="o">-</span><span class="mi">927</span><span class="n">kh</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">2</span> <span class="p">(</span><span class="mi">16</span><span class="n">m</span> <span class="n">ago</span><span class="p">)</span>   <span class="mi">27</span><span class="n">m</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get pv</span>
+<span class="n">NAME</span>                                       <span class="n">CAPACITY</span>   <span class="n">ACCESS</span> <span class="n">MODES</span>   <span class="n">RECLAIM</span> <span class="n">POLICY</span>   <span class="n">STATUS</span>   <span class="n">CLAIM</span>                      <span class="n">STORAGECLASS</span>   <span class="n">REASON</span>   <span class="n">AGE</span>
+<span class="n">pvc</span><span class="o">-</span><span class="mi">320</span><span class="n">c40f4</span><span class="o">-</span><span class="mi">9</span><span class="n">f72</span><span class="o">-</span><span class="mf">47e8</span><span class="o">-</span><span class="mi">8461</span><span class="o">-</span><span class="mi">2550</span><span class="n">f88246dd</span>   <span class="mi">8</span><span class="n">Gi</span>        <span class="n">RWO</span>            <span class="n">Delete</span>           <span class="n">Bound</span>    <span class="n">default</span><span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="mi">1715325658</span>   <span class="n">nfs</span><span class="o">-</span><span class="n">client</span>              <span class="mi">3</span><span class="n">m18s</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get pvc</span>
+<span class="n">NAME</span>               <span class="n">STATUS</span>   <span class="n">VOLUME</span>                                     <span class="n">CAPACITY</span>   <span class="n">ACCESS</span> <span class="n">MODES</span>   <span class="n">STORAGECLASS</span>   <span class="n">AGE</span>
+<span class="n">mysql</span><span class="o">-</span><span class="mi">1715325658</span>   <span class="n">Bound</span>    <span class="n">pvc</span><span class="o">-</span><span class="mi">320</span><span class="n">c40f4</span><span class="o">-</span><span class="mi">9</span><span class="n">f72</span><span class="o">-</span><span class="mf">47e8</span><span class="o">-</span><span class="mi">8461</span><span class="o">-</span><span class="mi">2550</span><span class="n">f88246dd</span>   <span class="mi">8</span><span class="n">Gi</span>        <span class="n">RWO</span>            <span class="n">nfs</span><span class="o">-</span><span class="n">client</span>     <span class="mi">3</span><span class="n">m21s</span>
+<span class="o">~</span><span class="p">]</span><span class="c1"># kubectl  get svc</span>
+<span class="n">NAME</span>               <span class="n">TYPE</span>        <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>       <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>    <span class="n">AGE</span>
+<span class="n">kubernetes</span>         <span class="n">ClusterIP</span>   <span class="mf">10.96.0.1</span>        <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">443</span><span class="o">/</span><span class="n">TCP</span>    <span class="mi">3</span><span class="n">d5h</span>
+<span class="n">mysql</span><span class="o">-</span><span class="mi">1715325658</span>   <span class="n">ClusterIP</span>   <span class="mf">10.111.120.197</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">3306</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">3</span><span class="n">m24s</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>删除Release</p>
+<ul>
+<li><p>uninstall</p></li>
+<li><p>delete</p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># helm del  mysql-1715325658   </span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 在删除的时候使用 --keep-history 参数，则会保留 release 的历史记录，该 release 的状态就是 UNINSTALLED，</span>
+<span class="o">~</span><span class="p">]</span><span class="c1">#  helm uninstall mysql-1715326296  --keep-history</span>
+<span class="n">release</span> <span class="s2">&quot;mysql-1715326296&quot;</span> <span class="n">uninstalled</span>
+<span class="p">[</span><span class="n">root</span><span class="nd">@k8s</span><span class="o">-</span><span class="n">master</span><span class="o">-</span><span class="mi">01</span> <span class="o">~</span><span class="p">]</span><span class="c1"># helm ls -a</span>
+<span class="n">NAME</span>                    <span class="n">NAMESPACE</span>       <span class="n">REVISION</span>        <span class="n">UPDATED</span>                                 <span class="n">STATUS</span>          <span class="n">CHART</span>           <span class="n">APP</span> <span class="n">VERSION</span>
+<span class="n">mysql</span><span class="o">-</span><span class="mi">1715326296</span>        <span class="n">default</span>         <span class="mi">1</span>               <span class="mi">2024</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">10</span> <span class="mi">15</span><span class="p">:</span><span class="mi">31</span><span class="p">:</span><span class="mf">37.691519366</span> <span class="o">+</span><span class="mi">0800</span> <span class="n">CST</span> <span class="n">uninstalled</span>     <span class="n">mysql</span><span class="o">-</span><span class="mf">1.6.9</span>     <span class="mf">5.7.30</span>     
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># 取消删除release
+~]# helm rollback mysql-1715326296 1     
+Rollback was a success! Happy Helming!
+~]# helm list
+NAME                    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
+mysql-1715326296        default         2               2024-05-10 15:33:42.513180988 +0800 CST deployed        mysql-1.6.9     5.7.30  
+</pre></div>
+</div>
+</section>
+<section id="id5">
+<h4>2.定制参数<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># helm search repo mysql</span>
+<span class="n">NAME</span>                                    <span class="n">CHART</span> <span class="n">VERSION</span>   <span class="n">APP</span> <span class="n">VERSION</span>     <span class="n">DESCRIPTION</span>                                       
+<span class="n">stable</span><span class="o">/</span><span class="n">mysql</span>                            <span class="mf">1.6.9</span>           <span class="mf">5.7.30</span>          <span class="n">DEPRECATED</span> <span class="o">-</span> <span class="n">Fast</span><span class="p">,</span> <span class="n">reliable</span><span class="p">,</span> <span class="n">scalable</span><span class="p">,</span> <span class="ow">and</span> <span class="n">easy</span><span class="o">...</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>拉取charts到本地并解压</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># helm pull stable/mysql --version=1.6.9  --untar</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>定制values.yaml</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cd mysql/</span>
+<span class="n">mysql</span><span class="p">]</span><span class="c1"># cp values.yaml values.yaml.bak</span>
+<span class="c1"># 配置values.yaml如下：</span>
+<span class="n">mysql</span><span class="p">]</span><span class="c1"># diff values.yaml values.yaml.bak </span>
+<span class="mi">24</span><span class="n">c24</span>
+<span class="o">&lt;</span> <span class="n">mysqlRootPassword</span><span class="p">:</span> <span class="n">root123456</span>
+<span class="o">---</span>
+<span class="o">&gt;</span> <span class="c1"># mysqlRootPassword: testing</span>
+<span class="mi">113</span><span class="n">c113</span>
+<span class="o">&lt;</span>   <span class="n">storageClass</span><span class="p">:</span> <span class="s2">&quot;nfs-client&quot;</span>
+<span class="o">---</span>
+<span class="o">&gt;</span>   <span class="c1"># storageClass: &quot;-&quot;</span>
+<span class="mi">190</span><span class="n">c190</span>
+<span class="o">&lt;</span>   <span class="nb">type</span><span class="p">:</span> <span class="n">NodePort</span>
+<span class="o">---</span>
+<span class="o">&gt;</span>   <span class="nb">type</span><span class="p">:</span> <span class="n">ClusterIP</span>
+<span class="mi">192</span><span class="n">c192</span>
+<span class="o">&lt;</span>   <span class="n">nodePort</span><span class="p">:</span> <span class="mi">30306</span>
+<span class="o">---</span>
+<span class="o">&gt;</span>   <span class="c1"># nodePort: 32000</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>部署charts</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysql</span><span class="p">]</span><span class="c1"># helm install mydb -f values.yaml .</span>
+
+<span class="n">mysql</span><span class="p">]</span><span class="c1"># kubectl get all -l release=mydb</span>
+<span class="n">NAME</span>                             <span class="n">READY</span>   <span class="n">STATUS</span>    <span class="n">RESTARTS</span>   <span class="n">AGE</span>
+<span class="n">pod</span><span class="o">/</span><span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span><span class="o">-</span><span class="mi">85</span><span class="n">cc8cc89</span><span class="o">-</span><span class="n">rdbfr</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="n">Running</span>   <span class="mi">0</span>          <span class="mi">2</span><span class="n">m32s</span>
+
+<span class="n">NAME</span>                 <span class="n">TYPE</span>       <span class="n">CLUSTER</span><span class="o">-</span><span class="n">IP</span>       <span class="n">EXTERNAL</span><span class="o">-</span><span class="n">IP</span>   <span class="n">PORT</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>          <span class="n">AGE</span>
+<span class="n">service</span><span class="o">/</span><span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span>   <span class="n">NodePort</span>   <span class="mf">10.103.114.249</span>   <span class="o">&lt;</span><span class="n">none</span><span class="o">&gt;</span>        <span class="mi">3306</span><span class="p">:</span><span class="mi">30306</span><span class="o">/</span><span class="n">TCP</span>   <span class="mi">2</span><span class="n">m32s</span>
+
+<span class="n">NAME</span>                         <span class="n">READY</span>   <span class="n">UP</span><span class="o">-</span><span class="n">TO</span><span class="o">-</span><span class="n">DATE</span>   <span class="n">AVAILABLE</span>   <span class="n">AGE</span>
+<span class="n">deployment</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="mi">1</span>            <span class="mi">1</span>           <span class="mi">2</span><span class="n">m32s</span>
+
+<span class="n">NAME</span>                                   <span class="n">DESIRED</span>   <span class="n">CURRENT</span>   <span class="n">READY</span>   <span class="n">AGE</span>
+<span class="n">replicaset</span><span class="o">.</span><span class="n">apps</span><span class="o">/</span><span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span><span class="o">-</span><span class="mi">85</span><span class="n">cc8cc89</span>   <span class="mi">1</span>         <span class="mi">1</span>         <span class="mi">1</span>       <span class="mi">2</span><span class="n">m32s</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>查看覆盖的参数</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysql</span><span class="p">]</span><span class="c1"># helm get values mydb</span>
+<span class="o">...</span>
+<span class="n">persistence</span><span class="p">:</span>
+  <span class="n">accessMode</span><span class="p">:</span> <span class="n">ReadWriteOnce</span>
+  <span class="n">annotations</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="n">enabled</span><span class="p">:</span> <span class="n">true</span>
+  <span class="n">size</span><span class="p">:</span> <span class="mi">8</span><span class="n">Gi</span>
+  <span class="n">storageClass</span><span class="p">:</span> <span class="n">nfs</span><span class="o">-</span><span class="n">client</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h4>3.升级和回滚<a class="headerlink" href="#id6" title="Link to this heading"></a></h4>
+<section id="id7">
+<h5>1.升级<a class="headerlink" href="#id7" title="Link to this heading"></a></h5>
+<p>新版本的 chart 包发布的时候，或者当你要更改 release 的配置的时候，你可以使用 helm upgrade 命令来操作。升级需要一个现有的 release，并根据提供的信息对其进行升级。因为 Kubernetes charts 可能很大而且很复杂，Helm 会尝试以最小的侵入性进行升级，它只会更新自上一版本以来发生的变化：</p>
+<ul class="simple">
+<li><p>升级前查看版本</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysql</span><span class="p">]</span><span class="c1"># mysql -uroot -h 192.168.122.21 -P 30306 -p&#39;root123456&#39; -e &quot;select version()&quot;</span>
+<span class="o">+-----------+</span>
+<span class="o">|</span> <span class="n">version</span><span class="p">()</span> <span class="o">|</span>
+<span class="o">+-----------+</span>
+<span class="o">|</span> <span class="mf">5.7.30</span>    <span class="o">|</span>
+<span class="o">+-----------+</span>
+ <span class="n">mysql</span><span class="p">]</span><span class="c1"># kubectl  get deployment mydb-mysql -o wide</span>
+<span class="n">NAME</span>         <span class="n">READY</span>   <span class="n">UP</span><span class="o">-</span><span class="n">TO</span><span class="o">-</span><span class="n">DATE</span>   <span class="n">AVAILABLE</span>   <span class="n">AGE</span>   <span class="n">CONTAINERS</span>   <span class="n">IMAGES</span>         <span class="n">SELECTOR</span>
+<span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="mi">1</span>            <span class="mi">1</span>           <span class="mi">11</span><span class="n">m</span>   <span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span>   <span class="n">mysql</span><span class="p">:</span><span class="mf">5.7.30</span>   <span class="n">app</span><span class="o">=</span><span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span><span class="p">,</span><span class="n">release</span><span class="o">=</span><span class="n">mydb</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>升级镜像为5.7.31</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysql</span><span class="p">]</span><span class="c1"># helm upgrade mydb  -f values.yaml  --set imageTag=5.7.31 . </span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>升级后确认</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mysql</span><span class="p">]</span><span class="c1"># mysql -uroot -h 192.168.122.21 -P 30306 -p&#39;root123456&#39; -e &quot;select version()&quot;</span>
+<span class="o">+-----------+</span>
+<span class="o">|</span> <span class="n">version</span><span class="p">()</span> <span class="o">|</span>
+<span class="o">+-----------+</span>
+<span class="o">|</span> <span class="mf">5.7.31</span>    <span class="o">|</span>
+<span class="o">+-----------+</span>
+<span class="n">mysql</span><span class="p">]</span><span class="c1"># kubectl  get deployment mydb-mysql -o wide</span>
+<span class="n">NAME</span>         <span class="n">READY</span>   <span class="n">UP</span><span class="o">-</span><span class="n">TO</span><span class="o">-</span><span class="n">DATE</span>   <span class="n">AVAILABLE</span>   <span class="n">AGE</span>   <span class="n">CONTAINERS</span>   <span class="n">IMAGES</span>         <span class="n">SELECTOR</span>
+<span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span>   <span class="mi">1</span><span class="o">/</span><span class="mi">1</span>     <span class="mi">1</span>            <span class="mi">1</span>           <span class="mi">15</span><span class="n">m</span>   <span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span>   <span class="n">mysql</span><span class="p">:</span><span class="mf">5.7.31</span>   <span class="n">app</span><span class="o">=</span><span class="n">mydb</span><span class="o">-</span><span class="n">mysql</span><span class="p">,</span><span class="n">release</span><span class="o">=</span><span class="n">mydb</span>
+</pre></div>
+</div>
+</section>
+<section id="id8">
+<h5>2.回滚<a class="headerlink" href="#id8" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>mysql]# helm history mydb
+REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION     
+1               Fri May 10 15:42:50 2024        superseded      mysql-1.6.9     5.7.30          Install complete
+2               Fri May 10 15:56:38 2024        deployed        mysql-1.6.9     5.7.30          Upgrade complete
+mysql]# helm rollback mydb 1
+Rollback was a success! Happy Helming!
+mysql]# kubectl  get deployment mydb-mysql -o wide
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES         SELECTOR
+mydb-mysql   0/1     1            0           16m   mydb-mysql   mysql:5.7.30   app=mydb-mysql,release=mydb
+
+mysql]# helm history mydb
+REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION     
+1               Fri May 10 15:42:50 2024        superseded      mysql-1.6.9     5.7.30          Install complete
+2               Fri May 10 15:56:38 2024        superseded      mysql-1.6.9     5.7.30          Upgrade complete
+3               Fri May 10 15:59:18 2024        deployed        mysql-1.6.9     5.7.30          Rollback to 1   
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="charts">
+<h3>Charts开发<a class="headerlink" href="#charts" title="Link to this heading"></a></h3>
+<section id="id9">
+<h4>1.Charts目录结构<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~]#  helm create myapp
+
+~]# tree myapp/
+~]# tree myapp
+myapp
+├── charts
+├── Chart.yaml
+├── templates
+│   ├── deployment.yaml
+│   ├── _helpers.tpl
+│   ├── hpa.yaml
+│   ├── ingress.yaml
+│   ├── NOTES.txt
+│   ├── serviceaccount.yaml
+│   ├── service.yaml
+│   └── tests
+│       └── test-connection.yaml
+└── values.yaml
+</pre></div>
+</div>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>文件</th>
+<th>说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chart.yaml</td>
+<td>用于描述Chart的基本信息;</td>
+<td>通过 <code>helm show chart myapp</code> 查看</td>
+</tr>
+<tr>
+<td>values.yaml</td>
+<td>Chart的默认配置文件;</td>
+<td>通过 <code>helm show values myapp/</code> 查看</td>
+</tr>
+<tr>
+<td>README.md</td>
+<td>[可选] 当前Chart的介绍</td>
+<td></td>
+</tr>
+<tr>
+<td>LICENS</td>
+<td>[可选] 协议</td>
+<td></td>
+</tr>
+<tr>
+<td>requirements.yaml</td>
+<td>[可选] 用于存放当前Chart依赖的其它Chart的说明文件</td>
+<td></td>
+</tr>
+<tr>
+<td>charts/</td>
+<td>[可选]: 该目录中放置当前Chart依赖的其它Chart</td>
+<td></td>
+</tr>
+<tr>
+<td>templates/</td>
+<td>[可选]: 部署文件模版目录</td>
+<td></td>
+</tr>
+</tbody>
+</table></section>
+<section id="id10">
+<h4>2.Charts预定义变量<a class="headerlink" href="#id10" title="Link to this heading"></a></h4>
+<table border="1" class="docutils">
+<thead>
+<tr>
+<th>变量名</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Release.Name</td>
+<td>发布的名称（不是chart）</td>
+</tr>
+<tr>
+<td>Release.Time</td>
+<td>chart发布上次更新的时间。这将匹配Last ReleasedRelease对象上的时间</td>
+</tr>
+<tr>
+<td>Release.Namespace</td>
+<td>chart发布到的名称空间</td>
+</tr>
+<tr>
+<td>Release.Service</td>
+<td>进行发布的服务</td>
+</tr>
+<tr>
+<td>Release.IsUpgrade</td>
+<td>如果当前操作是升级或回滚，则设置为true</td>
+</tr>
+<tr>
+<td>Release.IsInstall</td>
+<td>如果当前操作是安装，则设置为true</td>
+</tr>
+<tr>
+<td>Release.Revision</td>
+<td>修订号。它从1开始，每个都递增helm upgrade</td>
+</tr>
+<tr>
+<td>Chart</td>
+<td>内容Chart.yaml</td>
+</tr>
+<tr>
+<td>Files</td>
+<td>类似于chart的对象</td>
+</tr>
+<tr>
+<td>Capabilities</td>
+<td>类似于地图的对象，包含有关Kubernetes（{{.Capabilities.KubeVersion}}</td>
+</tr>
+</tbody>
+</table></section>
+<section id="chart">
+<h4>3.开发Chart<a class="headerlink" href="#chart" title="Link to this heading"></a></h4>
+<section id="a-charts">
+<h5>a.定义Charts描述信息<a class="headerlink" href="#a-charts" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vim</span> <span class="n">myapp</span><span class="o">/</span><span class="n">Chart</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v2</span>
+<span class="n">name</span><span class="p">:</span> <span class="n">myapp</span>
+<span class="n">description</span><span class="p">:</span> <span class="n">A</span> <span class="n">Helm</span> <span class="n">chart</span> <span class="k">for</span> <span class="n">Kubernetes</span><span class="o">.</span>
+<span class="nb">type</span><span class="p">:</span> <span class="n">application</span>
+<span class="n">version</span><span class="p">:</span> <span class="mf">0.0.1</span>
+<span class="n">appVersion</span><span class="p">:</span> <span class="s2">&quot;1.16.0&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="b-deployment-yaml">
+<h5>b.定义deployment.yaml模板<a class="headerlink" href="#b-deployment-yaml" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vim</span>   <span class="n">myapp</span><span class="o">/</span><span class="n">templates</span><span class="o">/</span><span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span> 
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="p">{{</span> <span class="n">include</span> <span class="s2">&quot;myapp.fullname&quot;</span> <span class="o">.</span> <span class="p">}}</span>  
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="p">{{</span><span class="o">-</span> <span class="n">include</span> <span class="s2">&quot;myapp.labels&quot;</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">4</span> <span class="p">}}</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="p">{{</span><span class="o">-</span> <span class="k">if</span> <span class="ow">not</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">autoscaling</span><span class="o">.</span><span class="n">enabled</span> <span class="p">}}</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="p">{{</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">replicaCount</span> <span class="p">}}</span>
+  <span class="p">{{</span><span class="o">-</span> <span class="n">end</span> <span class="p">}}</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="n">include</span> <span class="s2">&quot;myapp.selectorLabels&quot;</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">6</span> <span class="p">}}</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="k">with</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">podAnnotations</span> <span class="p">}}</span>
+      <span class="n">annotations</span><span class="p">:</span>
+        <span class="p">{{</span><span class="o">-</span> <span class="n">toYaml</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">8</span> <span class="p">}}</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="n">end</span> <span class="p">}}</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="p">{{</span><span class="o">-</span> <span class="n">include</span> <span class="s2">&quot;myapp.selectorLabels&quot;</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">8</span> <span class="p">}}</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="k">with</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">imagePullSecrets</span> <span class="p">}}</span>
+      <span class="n">imagePullSecrets</span><span class="p">:</span>
+        <span class="p">{{</span><span class="o">-</span> <span class="n">toYaml</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">8</span> <span class="p">}}</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="n">end</span> <span class="p">}}</span>
+      <span class="n">serviceAccountName</span><span class="p">:</span> <span class="p">{{</span> <span class="n">include</span> <span class="s2">&quot;myapp.serviceAccountName&quot;</span> <span class="o">.</span> <span class="p">}}</span>
+      <span class="n">securityContext</span><span class="p">:</span>
+        <span class="p">{{</span><span class="o">-</span> <span class="n">toYaml</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">podSecurityContext</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">8</span> <span class="p">}}</span>
+      <span class="n">containers</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="p">{{</span> <span class="o">.</span><span class="n">Chart</span><span class="o">.</span><span class="n">Name</span> <span class="p">}}</span>
+          <span class="n">securityContext</span><span class="p">:</span>
+            <span class="p">{{</span><span class="o">-</span> <span class="n">toYaml</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">securityContext</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">12</span> <span class="p">}}</span>
+          <span class="n">image</span><span class="p">:</span> <span class="s2">&quot;{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}&quot;</span>
+          <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="p">{{</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">pullPolicy</span> <span class="p">}}</span>
+          <span class="n">ports</span><span class="p">:</span>
+            <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">http</span>
+              <span class="n">containerPort</span><span class="p">:</span> <span class="p">{{</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">port</span> <span class="p">}}</span>
+              <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+          <span class="n">livenessProbe</span><span class="p">:</span>
+            <span class="n">httpGet</span><span class="p">:</span>
+              <span class="n">path</span><span class="p">:</span> <span class="o">/</span>
+              <span class="n">port</span><span class="p">:</span> <span class="n">http</span>
+          <span class="n">readinessProbe</span><span class="p">:</span>
+            <span class="n">httpGet</span><span class="p">:</span>
+              <span class="n">path</span><span class="p">:</span> <span class="o">/</span>
+              <span class="n">port</span><span class="p">:</span> <span class="n">http</span>
+          <span class="n">resources</span><span class="p">:</span>
+            <span class="p">{{</span><span class="o">-</span> <span class="n">toYaml</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">resources</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">12</span> <span class="p">}}</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="k">with</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">nodeSelector</span> <span class="p">}}</span>
+      <span class="n">nodeSelector</span><span class="p">:</span>
+        <span class="p">{{</span><span class="o">-</span> <span class="n">toYaml</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">8</span> <span class="p">}}</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="n">end</span> <span class="p">}}</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="k">with</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">affinity</span> <span class="p">}}</span>
+      <span class="n">affinity</span><span class="p">:</span>
+        <span class="p">{{</span><span class="o">-</span> <span class="n">toYaml</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">8</span> <span class="p">}}</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="n">end</span> <span class="p">}}</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="k">with</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">tolerations</span> <span class="p">}}</span>
+      <span class="n">tolerations</span><span class="p">:</span>
+        <span class="p">{{</span><span class="o">-</span> <span class="n">toYaml</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">8</span> <span class="p">}}</span>
+      <span class="p">{{</span><span class="o">-</span> <span class="n">end</span> <span class="p">}}</span>
+</pre></div>
+</div>
+</section>
+<section id="c-service-yaml">
+<h5>c.定义service.yaml模板<a class="headerlink" href="#c-service-yaml" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cat myapp/templates/service.yaml </span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="p">{{</span> <span class="n">include</span> <span class="s2">&quot;myapp.fullname&quot;</span> <span class="o">.</span> <span class="p">}}</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="p">{{</span><span class="o">-</span> <span class="n">include</span> <span class="s2">&quot;myapp.labels&quot;</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">4</span> <span class="p">}}</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="nb">type</span><span class="p">:</span> <span class="p">{{</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">type</span> <span class="p">}}</span>
+  <span class="n">ports</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">port</span><span class="p">:</span> <span class="p">{{</span> <span class="o">.</span><span class="n">Values</span><span class="o">.</span><span class="n">service</span><span class="o">.</span><span class="n">port</span> <span class="p">}}</span>
+      <span class="n">targetPort</span><span class="p">:</span> <span class="n">http</span>
+      <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+      <span class="n">name</span><span class="p">:</span> <span class="n">http</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="p">{{</span><span class="o">-</span> <span class="n">include</span> <span class="s2">&quot;myapp.selectorLabels&quot;</span> <span class="o">.</span> <span class="o">|</span> <span class="n">nindent</span> <span class="mi">4</span> <span class="p">}}</span>
+</pre></div>
+</div>
+</section>
+<section id="d-ingress-yaml">
+<h5>d.定义ingress.yaml模板(可选)<a class="headerlink" href="#d-ingress-yaml" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~]# cat myapp/templates/service.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include &quot;myapp.fullname&quot; . }}
+  labels:
+    {{- include &quot;myapp.labels&quot; . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include &quot;myapp.selectorLabels&quot; . | nindent 4 }}
+[root@k8s-master-01 ~]# cat myapp/templates/ingress.yaml 
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include &quot;myapp.fullname&quot; . -}}
+{{- $svcPort := .Values.service.port -}}
+{{- if and .Values.ingress.className (not (semverCompare &quot;&gt;=1.18-0&quot; .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.ingress.annotations &quot;kubernetes.io/ingress.class&quot;) }}
+  {{- $_ := set .Values.ingress.annotations &quot;kubernetes.io/ingress.class&quot; .Values.ingress.className}}
+  {{- end }}
+{{- end }}
+{{- if semverCompare &quot;&gt;=1.19-0&quot; .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1
+{{- else if semverCompare &quot;&gt;=1.14-0&quot; .Capabilities.KubeVersion.GitVersion -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    {{- include &quot;myapp.labels&quot; . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if and .Values.ingress.className (semverCompare &quot;&gt;=1.18-0&quot; .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if and .pathType (semverCompare &quot;&gt;=1.18-0&quot; $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              {{- if semverCompare &quot;&gt;=1.19-0&quot; $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ $fullName }}
+                port:
+                  number: {{ $svcPort }}
+              {{- else }}
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+              {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+</pre></div>
+</div>
+</section>
+<section id="e-value-yaml">
+<h5>e.配置value.yaml<a class="headerlink" href="#e-value-yaml" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cat myapp/values.yaml </span>
+<span class="c1"># Default values for myapp.</span>
+<span class="c1"># This is a YAML-formatted file.</span>
+<span class="c1"># Declare variables to be passed into your templates.</span>
+
+<span class="n">replicaCount</span><span class="p">:</span> <span class="mi">1</span>
+
+<span class="n">image</span><span class="p">:</span>
+  <span class="n">repository</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">pullPolicy</span><span class="p">:</span> <span class="n">IfNotPresent</span>
+  <span class="c1"># Overrides the image tag whose default is the chart appVersion.</span>
+  <span class="n">tag</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+
+<span class="n">imagePullSecrets</span><span class="p">:</span> <span class="p">[]</span>
+<span class="n">nameOverride</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+<span class="n">fullnameOverride</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+
+<span class="n">serviceAccount</span><span class="p">:</span>
+  <span class="c1"># Specifies whether a service account should be created</span>
+  <span class="n">create</span><span class="p">:</span> <span class="n">true</span>
+  <span class="c1"># Annotations to add to the service account</span>
+  <span class="n">annotations</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="c1"># The name of the service account to use.</span>
+  <span class="c1"># If not set and create is true, a name is generated using the fullname template</span>
+  <span class="n">name</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+
+<span class="n">podAnnotations</span><span class="p">:</span> <span class="p">{}</span>
+
+<span class="n">podSecurityContext</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="c1"># fsGroup: 2000</span>
+
+<span class="n">securityContext</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="c1"># capabilities:</span>
+  <span class="c1">#   drop:</span>
+  <span class="c1">#   - ALL</span>
+  <span class="c1"># readOnlyRootFilesystem: true</span>
+  <span class="c1"># runAsNonRoot: true</span>
+  <span class="c1"># runAsUser: 1000</span>
+
+<span class="n">service</span><span class="p">:</span>
+  <span class="nb">type</span><span class="p">:</span> <span class="n">ClusterIP</span>
+  <span class="n">port</span><span class="p">:</span> <span class="mi">80</span>
+
+<span class="n">ingress</span><span class="p">:</span>
+  <span class="n">enabled</span><span class="p">:</span> <span class="n">false</span>
+  <span class="n">className</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+  <span class="n">annotations</span><span class="p">:</span> <span class="p">{}</span>
+    <span class="c1"># kubernetes.io/ingress.class: nginx</span>
+    <span class="c1"># kubernetes.io/tls-acme: &quot;true&quot;</span>
+  <span class="n">hosts</span><span class="p">:</span>
+    <span class="o">-</span> <span class="n">host</span><span class="p">:</span> <span class="n">chart</span><span class="o">-</span><span class="n">example</span><span class="o">.</span><span class="n">local</span>
+      <span class="n">paths</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">path</span><span class="p">:</span> <span class="o">/</span>
+          <span class="n">pathType</span><span class="p">:</span> <span class="n">ImplementationSpecific</span>
+  <span class="n">tls</span><span class="p">:</span> <span class="p">[]</span>
+  <span class="c1">#  - secretName: chart-example-tls</span>
+  <span class="c1">#    hosts:</span>
+  <span class="c1">#      - chart-example.local</span>
+
+<span class="n">resources</span><span class="p">:</span> <span class="p">{}</span>
+  <span class="c1"># We usually recommend not to specify default resources and to leave this as a conscious</span>
+  <span class="c1"># choice for the user. This also increases chances charts run on environments with little</span>
+  <span class="c1"># resources, such as Minikube. If you do want to specify resources, uncomment the following</span>
+  <span class="c1"># lines, adjust them as necessary, and remove the curly braces after &#39;resources:&#39;.</span>
+  <span class="c1"># limits:</span>
+  <span class="c1">#   cpu: 100m</span>
+  <span class="c1">#   memory: 128Mi</span>
+  <span class="c1"># requests:</span>
+  <span class="c1">#   cpu: 100m</span>
+  <span class="c1">#   memory: 128Mi</span>
+
+<span class="n">autoscaling</span><span class="p">:</span>
+  <span class="n">enabled</span><span class="p">:</span> <span class="n">false</span>
+  <span class="n">minReplicas</span><span class="p">:</span> <span class="mi">1</span>
+  <span class="n">maxReplicas</span><span class="p">:</span> <span class="mi">100</span>
+  <span class="n">targetCPUUtilizationPercentage</span><span class="p">:</span> <span class="mi">80</span>
+  <span class="c1"># targetMemoryUtilizationPercentage: 80</span>
+
+<span class="n">nodeSelector</span><span class="p">:</span> <span class="p">{}</span>
+
+<span class="n">tolerations</span><span class="p">:</span> <span class="p">[]</span>
+
+<span class="n">affinity</span><span class="p">:</span> <span class="p">{}</span>
+</pre></div>
+</div>
+</section>
+<section id="f-yaml">
+<h5>f.查看模板渲染后的YAML<a class="headerlink" href="#f-yaml" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~]# helm install myapp  myapp/  --dry-run          
+NAME: myapp
+LAST DEPLOYED: Fri May 10 16:40:45 2024
+NAMESPACE: default
+STATUS: pending-install
+REVISION: 1
+HOOKS:
+---
+# Source: myapp/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: &quot;myapp-test-connection&quot;
+  labels:
+    helm.sh/chart: myapp-0.1.0
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: myapp
+    app.kubernetes.io/version: &quot;1.16.0&quot;
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    &quot;helm.sh/hook&quot;: test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: [&#39;wget&#39;]
+      args: [&#39;myapp:80&#39;]
+  restartPolicy: Never
+MANIFEST:
+---
+# Source: myapp/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: myapp
+  labels:
+    helm.sh/chart: myapp-0.1.0
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: myapp
+    app.kubernetes.io/version: &quot;1.16.0&quot;
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: myapp/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+  labels:
+    helm.sh/chart: myapp-0.1.0
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: myapp
+    app.kubernetes.io/version: &quot;1.16.0&quot;
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: myapp
+---
+# Source: myapp/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  labels:
+    helm.sh/chart: myapp-0.1.0
+    app.kubernetes.io/name: myapp
+    app.kubernetes.io/instance: myapp
+    app.kubernetes.io/version: &quot;1.16.0&quot;
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: myapp
+      app.kubernetes.io/instance: myapp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: myapp
+        app.kubernetes.io/instance: myapp
+    spec:
+      serviceAccountName: myapp
+      securityContext:
+        {}
+      containers:
+        - name: myapp
+          securityContext:
+            {}
+          image: &quot;nginx:1.16.0&quot;
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}
+
+NOTES:
+1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace default -l &quot;app.kubernetes.io/name=myapp,app.kubernetes.io/instance=myapp&quot; -o jsonpath=&quot;{.items[0].metadata.name}&quot;)
+  export CONTAINER_PORT=$(kubectl get pod --namespace default $POD_NAME -o jsonpath=&quot;{.spec.containers[0].ports[0].containerPort}&quot;)
+  echo &quot;Visit http://127.0.0.1:8080 to use your application&quot;
+  kubectl --namespace default port-forward $POD_NAME 8080:$CONTAINER_PORT
+</pre></div>
+</div>
+</section>
+<section id="g-myapp">
+<h5>g.部署myapp<a class="headerlink" href="#g-myapp" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>~]# helm install myapp  myapp/  -n test
+NAME: myapp
+LAST DEPLOYED: Fri May 10 16:42:40 2024
+NAMESPACE: test
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace test -l &quot;app.kubernetes.io/name=myapp,app.kubernetes.io/instance=myapp&quot; -o jsonpath=&quot;{.items[0].metadata.name}&quot;)
+  export CONTAINER_PORT=$(kubectl get pod --namespace test $POD_NAME -o jsonpath=&quot;{.spec.containers[0].ports[0].containerPort}&quot;)
+  echo &quot;Visit http://127.0.0.1:8080 to use your application&quot;
+  kubectl --namespace test port-forward $POD_NAME 8080:$CONTAINER_PORT
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># helm ls -n test</span>
+<span class="n">NAME</span>    <span class="n">NAMESPACE</span>       <span class="n">REVISION</span>        <span class="n">UPDATED</span>                                 <span class="n">STATUS</span>          <span class="n">CHART</span>           <span class="n">APP</span> <span class="n">VERSION</span>
+<span class="n">myapp</span>   <span class="n">test</span>            <span class="mi">1</span>               <span class="mi">2024</span><span class="o">-</span><span class="mi">05</span><span class="o">-</span><span class="mi">10</span> <span class="mi">16</span><span class="p">:</span><span class="mi">42</span><span class="p">:</span><span class="mf">40.202562735</span> <span class="o">+</span><span class="mi">0800</span> <span class="n">CST</span> <span class="n">deployed</span>        <span class="n">myapp</span><span class="o">-</span><span class="mf">0.1.0</span>     <span class="mf">1.16.0</span>    
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id11">
+<h3>Chart包托管<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>前提： 托管Chart包到Habro仓库，Harbor仓库安装时需支持chart,实例代码：<code class="docutils literal notranslate"><span class="pre">./install.sh</span> <span class="pre">--with-chartmuseum</span></code></p>
+</div></blockquote>
+<p><img alt="../_images/helm03.png" src="../_images/helm03.png" /></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># docker login reg.linux.io -uadmin -padmin123</span>
+</pre></div>
+</div>
+<section id="push">
+<h4>1.安装push插件<a class="headerlink" href="#push" title="Link to this heading"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>~<span class="o">]</span><span class="c1"># yum install -y git</span>
+~<span class="o">]</span><span class="c1"># helm plugin install https://github.com/chartmuseum/helm-push</span>
+~<span class="o">]</span><span class="c1"># helm plugin install https://github.com/chartmuseum/helm-push</span>
+Downloading<span class="w"> </span>and<span class="w"> </span>installing<span class="w"> </span>helm-push<span class="w"> </span>v0.10.4<span class="w"> </span>...
+https://github.com/chartmuseum/helm-push/releases/download/v0.10.4/helm-push_0.10.4_linux_amd64.tar.gz
+Installed<span class="w"> </span>plugin:<span class="w"> </span>cm-push
+
+~<span class="o">]</span><span class="c1"># ls /root/.local/share/helm/plugins/helm-push/bin/</span>
+helm-cm-push
+</pre></div>
+</div>
+</section>
+<section id="id12">
+<h4>2.打包应用<a class="headerlink" href="#id12" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cd myapp/</span>
+<span class="n">myapp</span><span class="p">]</span><span class="c1"># ls</span>
+<span class="n">charts</span>  <span class="n">Chart</span><span class="o">.</span><span class="n">yaml</span>  <span class="n">templates</span>  <span class="n">values</span><span class="o">.</span><span class="n">yaml</span>
+
+<span class="n">myapp</span><span class="p">]</span><span class="c1"># helm package .</span>
+<span class="n">Successfully</span> <span class="n">packaged</span> <span class="n">chart</span> <span class="ow">and</span> <span class="n">saved</span> <span class="n">it</span> <span class="n">to</span><span class="p">:</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">myapp</span><span class="o">-</span><span class="mf">0.1.0</span><span class="o">.</span><span class="n">tgz</span>
+</pre></div>
+</div>
+</section>
+<section id="harborhelm">
+<h4>3.添加harbor为helm仓库<a class="headerlink" href="#harborhelm" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">~</span><span class="p">]</span><span class="c1"># cd /etc/docker/certs.d/reg.linux.io</span>
+<span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="p">]</span><span class="c1"># helm repo add --ca-file ca.crt  \</span>
+  <span class="o">--</span><span class="n">cert</span><span class="o">-</span><span class="n">file</span> <span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">cert</span> \
+  <span class="o">--</span><span class="n">key</span><span class="o">-</span><span class="n">file</span> <span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">key</span>   \
+  <span class="o">--</span><span class="n">username</span> <span class="n">admin</span> <span class="o">--</span><span class="n">password</span> <span class="n">admin123</span> \
+  <span class="n">helmharbor</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">chartrepo</span><span class="o">/</span><span class="n">helm</span><span class="o">-</span><span class="n">charts</span> 
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>helm-charts :项目名</p></li>
+</ul>
+</section>
+<section id="chartsharbor">
+<h4>4.推送charts到Harbor<a class="headerlink" href="#chartsharbor" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">cm</span><span class="o">-</span><span class="n">push</span> <span class="o">--</span><span class="n">ca</span><span class="o">-</span><span class="n">file</span> <span class="n">ca</span><span class="o">.</span><span class="n">crt</span> \
+   <span class="o">--</span><span class="n">cert</span><span class="o">-</span><span class="n">file</span> <span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">cert</span> \
+   <span class="o">--</span><span class="n">key</span><span class="o">-</span><span class="n">file</span> <span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">key</span>   \
+   <span class="o">--</span><span class="n">username</span> <span class="n">admin</span> <span class="o">--</span><span class="n">password</span> <span class="n">admin123</span>  \
+   <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">myapp</span><span class="o">/</span><span class="n">myapp</span><span class="o">-</span><span class="mf">0.1.0</span><span class="o">.</span><span class="n">tgz</span>  <span class="n">helmharbor</span>
+</pre></div>
+</div>
+<p><img alt="../_images/helm04.png" src="../_images/helm04.png" /></p>
+</section>
+<section id="id13">
+<h4>5.使用charts<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>helm<span class="w"> </span>install<span class="w"> </span>--ca-file<span class="w"> </span>&lt;ca<span class="w"> </span>file&gt;<span class="w"> </span>--cert-file<span class="w"> </span>&lt;cert<span class="w"> </span>file&gt;<span class="w"> </span>--key-file<span class="w"> </span>&lt;key<span class="w"> </span>file&gt;<span class="w">     </span>--username<span class="o">=</span>&lt;username&gt;<span class="w"> </span>--password<span class="o">=</span>&lt;password&gt;<span class="w"> </span>--version<span class="w"> </span><span class="m">0</span>.1.0<span class="w"> </span>&lt;repo<span class="w"> </span>name&gt;/myapp
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="页脚">
+        <a href="storage.html" class="btn btn-neutral float-left" title="kubernetes存储方案" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> 上一页</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; 版权所有 2024, Deng You。</p>
+  </div>
+
+  利用 <a href="https://www.sphinx-doc.org/">Sphinx</a> 构建，使用的 
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">主题</a>
+    由 <a href="https://readthedocs.org">Read the Docs</a> 开发.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

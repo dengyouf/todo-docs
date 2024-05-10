@@ -16,12 +16,14 @@
    kubernetes/imagemgr.md
    kubernetes/secure.md
    kubernetes/storage.md
+   kubernetes/helm.md
 
 .. toctree::
    :maxdepth: 2
-   :caption: 分布式存储
+   :caption: DATABASE
 
-   ceph/base.md
+   database/base.md
+
 
 
 

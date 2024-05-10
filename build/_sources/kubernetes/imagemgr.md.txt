@@ -121,7 +121,7 @@ vim /opt/harbor/harbor.yml
 
 ```
 cd /opt/harbor/ && ./prepare
-cd /opt/harbor/ && ./install.sh
+cd /opt/harbor/ && ./install.sh --with-chartmuseum
 ```
 ```
 # stop harbor image data remains in the file system, so no data is lost.

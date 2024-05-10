@@ -71,10 +71,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="secure.html">kubernetes安全机制</a></li>
 <li class="toctree-l1"><a class="reference internal" href="storage.html">kubernetes存储方案</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">分布式存储</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../ceph/base.html">ceph集群</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helm.html">kubernetes包管理器</a></li>
 </ul>
 
         </div>
@@ -229,7 +226,7 @@ crontab  -e
 <li><p>Run the <code class="docutils literal notranslate"><span class="pre">prepare</span></code> script to enable HTTPS</p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">harbor</span><span class="o">/</span> <span class="o">&amp;&amp;</span> <span class="o">./</span><span class="n">prepare</span>
-<span class="n">cd</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">harbor</span><span class="o">/</span> <span class="o">&amp;&amp;</span> <span class="o">./</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span>
+<span class="n">cd</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">harbor</span><span class="o">/</span> <span class="o">&amp;&amp;</span> <span class="o">./</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="k">with</span><span class="o">-</span><span class="n">chartmuseum</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># stop harbor image data remains in the file system, so no data is lost.</span>

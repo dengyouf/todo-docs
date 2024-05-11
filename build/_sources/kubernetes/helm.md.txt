@@ -827,7 +827,7 @@ reg.linux.io]# helm repo add --ca-file ca.crt  \
 #### 4.推送charts到Harbor
 
 ```
-helm cm-push --ca-file ca.crt \
+reg.linux.io]# helm cm-push --ca-file ca.crt \
    --cert-file reg.linux.io.cert \
    --key-file reg.linux.io.key   \
    --username admin --password admin123  \
@@ -839,5 +839,9 @@ helm cm-push --ca-file ca.crt \
 #### 5.使用charts
 
 ```shell
-helm install --ca-file <ca file> --cert-file <cert file> --key-file <key file>     --username=<username> --password=<password> --version 0.1.0 <repo name>/myapp
+reg.linux.io]# helm install --ca-file ca.crt  \
+  --cert-file reg.linux.io.cert \
+  --key-file reg.linux.io.key   \
+  --username admin --password admin123 \
+  --version 0.1.0 helmharbor/myapp 
 ```

@@ -1095,7 +1095,7 @@ helm-cm-push
 </section>
 <section id="chartsharbor">
 <h4>4.推送charts到Harbor<a class="headerlink" href="#chartsharbor" title="Link to this heading"></a></h4>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">helm</span> <span class="n">cm</span><span class="o">-</span><span class="n">push</span> <span class="o">--</span><span class="n">ca</span><span class="o">-</span><span class="n">file</span> <span class="n">ca</span><span class="o">.</span><span class="n">crt</span> \
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="p">]</span><span class="c1"># helm cm-push --ca-file ca.crt \</span>
    <span class="o">--</span><span class="n">cert</span><span class="o">-</span><span class="n">file</span> <span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">cert</span> \
    <span class="o">--</span><span class="n">key</span><span class="o">-</span><span class="n">file</span> <span class="n">reg</span><span class="o">.</span><span class="n">linux</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">key</span>   \
    <span class="o">--</span><span class="n">username</span> <span class="n">admin</span> <span class="o">--</span><span class="n">password</span> <span class="n">admin123</span>  \
@@ -1106,7 +1106,11 @@ helm-cm-push
 </section>
 <section id="id13">
 <h4>5.使用charts<a class="headerlink" href="#id13" title="Link to this heading"></a></h4>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>helm<span class="w"> </span>install<span class="w"> </span>--ca-file<span class="w"> </span>&lt;ca<span class="w"> </span>file&gt;<span class="w"> </span>--cert-file<span class="w"> </span>&lt;cert<span class="w"> </span>file&gt;<span class="w"> </span>--key-file<span class="w"> </span>&lt;key<span class="w"> </span>file&gt;<span class="w">     </span>--username<span class="o">=</span>&lt;username&gt;<span class="w"> </span>--password<span class="o">=</span>&lt;password&gt;<span class="w"> </span>--version<span class="w"> </span><span class="m">0</span>.1.0<span class="w"> </span>&lt;repo<span class="w"> </span>name&gt;/myapp
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>reg.linux.io<span class="o">]</span><span class="c1"># helm install --ca-file ca.crt  \</span>
+<span class="w">  </span>--cert-file<span class="w"> </span>reg.linux.io.cert<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key-file<span class="w"> </span>reg.linux.io.key<span class="w">   </span><span class="se">\</span>
+<span class="w">  </span>--username<span class="w"> </span>admin<span class="w"> </span>--password<span class="w"> </span>admin123<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--version<span class="w"> </span><span class="m">0</span>.1.0<span class="w"> </span>helmharbor/myapp<span class="w"> </span>
 </pre></div>
 </div>
 </section>

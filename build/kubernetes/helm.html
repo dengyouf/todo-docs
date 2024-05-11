@@ -88,6 +88,27 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#kustomize">Kustomize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id14">Kustomize介绍</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Kustomize设计理念</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Kustomize 使用</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id17">1.管理资源对象</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configmapgenerator">2.configMapGenerator生成资源</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configmapgeneratorconfigmap">3.使用configMapGenerator生成configMap</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18">4.设置贯穿性字段</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id19">5.定制和组合资源</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">基准与覆盖</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23">kustomize管理对象</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id24">1.应用对象</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id25">2.查看对象</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id26">3.比较对象</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id27">4.删除对象</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1111,6 +1132,690 @@ helm-cm-push
 <span class="w">  </span>--key-file<span class="w"> </span>reg.linux.io.key<span class="w">   </span><span class="se">\</span>
 <span class="w">  </span>--username<span class="w"> </span>admin<span class="w"> </span>--password<span class="w"> </span>admin123<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--version<span class="w"> </span><span class="m">0</span>.1.0<span class="w"> </span>helmharbor/myapp<span class="w"> </span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="kustomize">
+<h2>Kustomize<a class="headerlink" href="#kustomize" title="Link to this heading"></a></h2>
+<section id="id14">
+<h3>Kustomize介绍<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p><a class="reference external" href="https://kubernetes.io/zh-cn/docs/tasks/manage-kubernetes-objects/kustomization/">官网</a> : <code class="docutils literal notranslate"><span class="pre">https://kubernetes.io/zh-cn/docs/tasks/manage-kubernetes-objects/kustomization/</span></code></p>
+</div></blockquote>
+<p>为了解决不同应用在不同环境中存在使用不同配置参数的复杂问题，容器的生太出现了helm，他简化了应用部署的管理难度。helm 类似与kubernetes程序包管理器，用于应用的配置分发，版本控制、查找等操作。他的核心功能十八 kubernetes资源对象打包到一个Charts中，制作完成的各个Charts保存到Charts仓库进行存储和转发。虽然helm可以解决资源对象声明周期管理已经通过模板进行版本控制，但是helm使用起来复杂，只想管理不同环境的yaml配置，helm引入了模板的概念，是的使用的复杂度更高。所以云原生社区提供了一个Kustomize工具，这个工具可以打包不同环境的yaml配置，，并在kubernetes v1.14以后集成到kubectl命令中，这是一个比Helm更轻量的配置管理工具。</p>
+<ul class="simple">
+<li><p>helm： 包管理工具</p></li>
+<li><p>kustomize：配置管理工具</p></li>
+</ul>
+<blockquote>
+<div><p>helm为了解决kubernetes集群中包安装管理的问题，kustomize是组合多个yaml实现轻量程序配置的工具</p>
+</div></blockquote>
+</section>
+<section id="id15">
+<h3>Kustomize设计理念<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<p>Kustomize 允许用户以一个应用描述文件(YAML文件) 为基础(Base YAML),然后通过Overlay的方式生成最终部署应用所需要的描述文件。两者都是由 kustomization 文件表示。 基础(Base YAML)声明了共享的内容(资源清单和常见的资源配置)，Overlay则声明了差异，他的设计目的是给 kubernets的用户提供一种可以重复使用同一套配置的声明式应用管理，从而在配置工作中的用户只需要管理和维护 kubernetes 的Api 对象，而不需要学习或安装其它的配置管理工具，也不需要复制粘贴来得到新的环境的配置。</p>
+<p><strong>Kustomize 是一个独立的工具，用来通过 kustomization 文件定制kubernetes对象</strong></p>
+<ul class="simple">
+<li><p>从其它来源生成资源</p></li>
+<li><p>为资源设置贯穿性字段</p></li>
+<li><p>组织和定制资源集合</p></li>
+</ul>
+</section>
+<section id="id16">
+<h3>Kustomize 使用<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<section id="id17">
+<h4>1.管理资源对象<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
+<p>从 kuberentes v1.14版本开始，kubectl 原生支持使用 kustomization 文件来管理 kubernetes对象</p>
+<ul class="simple">
+<li><p>命令格式</p>
+<ul>
+<li><p>渲染：kubectl kustomize &lt;customization_dir&gt;</p></li>
+<li><p>应用： kubectl apply -k &lt;customization_dir&gt;</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="configmapgenerator">
+<h4>2.configMapGenerator生成资源<a class="headerlink" href="#configmapgenerator" title="Link to this heading"></a></h4>
+<ol class="simple">
+<li><p>基于属性文件生成configmap</p></li>
+</ol>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#根据 application.properties文件的数据生成ConfigMap示例</span>
+<span class="n">k1</span><span class="p">]</span><span class="c1"># cat &gt; application.properties &lt;&lt;EOF</span>
+<span class="n">FOO</span><span class="o">=</span><span class="n">Bar</span>
+<span class="n">EOF</span>
+
+<span class="c1"># 编写kustomization文件</span>
+<span class="n">k1</span><span class="p">]</span><span class="c1"># cat &gt; ./kustomization.yaml  &lt;&lt;EOF</span>
+<span class="n">configMapGenerator</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">example</span><span class="o">-</span><span class="n">cm</span><span class="o">-</span><span class="mi">01</span>
+  <span class="n">files</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">application</span><span class="o">.</span><span class="n">properties</span>
+<span class="n">EOF</span>
+
+<span class="c1"># 查看渲染结果</span>
+<span class="n">k1</span><span class="p">]</span><span class="c1"># kubectl kustomize ./</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">data</span><span class="p">:</span>
+  <span class="n">application</span><span class="o">.</span><span class="n">properties</span><span class="p">:</span> <span class="o">|</span>
+    <span class="n">FOO</span><span class="o">=</span><span class="n">Bar</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">ConfigMap</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">example</span><span class="o">-</span><span class="n">cm</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="n">g4hk9g2ff8</span>
+  
+<span class="c1"># 应用部署cm</span>
+<span class="n">k1</span><span class="p">]</span><span class="c1"># kubectl  apply -k ./ -n test</span>
+<span class="n">configmap</span><span class="o">/</span><span class="n">example</span><span class="o">-</span><span class="n">cm</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="n">g4hk9g2ff8</span> <span class="n">created</span>
+<span class="n">k1</span><span class="p">]</span><span class="c1"># kubectl  get cm -n test</span>
+<span class="n">NAME</span>                       <span class="n">DATA</span>   <span class="n">AGE</span>
+<span class="n">example</span><span class="o">-</span><span class="n">cm</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="n">g4hk9g2ff8</span>   <span class="mi">1</span>      <span class="mi">6</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>2.使用env文件生成属性文件</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">k2</span><span class="p">]</span><span class="c1"># cat &gt; envfile &lt;&lt;EOF</span>
+<span class="n">For</span><span class="o">=</span><span class="n">Bar</span>
+<span class="n">EOF</span>
+
+<span class="n">k2</span><span class="p">]</span><span class="c1"># cat &gt; ./kustomization.yaml &lt;&lt;EOF</span>
+<span class="n">configMapGenerator</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">example</span><span class="o">-</span><span class="n">cm</span><span class="o">-</span><span class="mi">02</span>
+  <span class="n">envs</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">envfile</span>
+<span class="n">EOF</span>
+
+<span class="c1"># 查看渲染</span>
+<span class="n">k2</span><span class="p">]</span><span class="c1"># kubectl  kustomize ./                 </span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">data</span><span class="p">:</span>
+  <span class="n">For</span><span class="p">:</span> <span class="n">Bar</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">ConfigMap</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">example</span><span class="o">-</span><span class="n">cm</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="n">h55gh45c9d</span>
+</pre></div>
+</div>
+</section>
+<section id="configmapgeneratorconfigmap">
+<h4>3.使用configMapGenerator生成configMap<a class="headerlink" href="#configmapgeneratorconfigmap" title="Link to this heading"></a></h4>
+<p>在Deployment资源中使用由configMapGenerator生成的configmap</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 准备 application.properties文件的数据用于生成ConfigMap</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span><span class="n">application</span><span class="o">.</span><span class="n">properties</span>
+<span class="n">FOO</span><span class="o">=</span><span class="n">Bar</span>
+<span class="n">EOF</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span><span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">app</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span><span class="p">:</span><span class="mf">1.20</span>
+        <span class="n">volumeMounts</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">config</span>
+          <span class="n">mountPath</span><span class="p">:</span> <span class="o">/</span><span class="n">config</span>
+      <span class="n">volumes</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">config</span>
+        <span class="n">configMap</span><span class="p">:</span>
+          <span class="n">name</span><span class="p">:</span> <span class="n">example</span><span class="o">-</span><span class="n">configmap</span><span class="o">-</span><span class="mi">1</span> <span class="c1"># 这里需要匹配下面的name</span>
+<span class="n">EOF</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;./</span><span class="n">kustomization</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">resources</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">configMapGenerator</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">example</span><span class="o">-</span><span class="n">configmap</span><span class="o">-</span><span class="mi">1</span>
+  <span class="n">files</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">application</span><span class="o">.</span><span class="n">properties</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+</section>
+<section id="id18">
+<h4>4.设置贯穿性字段<a class="headerlink" href="#id18" title="Link to this heading"></a></h4>
+<p>在项目中为所有 Kubernetes 对象设置贯穿性字段是一种常见操作。 贯穿性字段的一些使用场景如下：</p>
+<ul class="simple">
+<li><p>为所有资源设置相同的名字空间</p></li>
+<li><p>为所有对象添加相同的前缀或后缀</p></li>
+<li><p>为对象添加相同的标签集合</p></li>
+<li><p>为对象添加相同的注解集合</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建一个 deployment.yaml</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;./</span><span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span><span class="o">-</span><span class="n">deployment</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">app</span><span class="p">:</span> <span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span>
+<span class="n">EOF</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;./</span><span class="n">kustomization</span><span class="o">.</span><span class="n">yml</span>
+<span class="n">namespace</span><span class="p">:</span> <span class="n">dev</span>
+<span class="n">namePrefix</span><span class="p">:</span> <span class="n">dev</span><span class="o">-</span>
+<span class="n">nameSuffix</span><span class="p">:</span> <span class="s2">&quot;-001&quot;</span>
+<span class="n">commonLabels</span><span class="p">:</span>
+  <span class="n">app</span><span class="p">:</span> <span class="n">bingo</span>
+<span class="n">commonAnnotations</span><span class="p">:</span>
+  <span class="n">oncallPager</span><span class="p">:</span> <span class="mi">800</span><span class="o">-</span><span class="mi">555</span><span class="o">-</span><span class="mi">1212</span>
+<span class="n">resources</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>k5<span class="o">]</span><span class="c1"># kubectl  kustomize ./</span>
+apiVersion:<span class="w"> </span>apps/v1
+kind:<span class="w"> </span>Deployment
+metadata:
+<span class="w">  </span>annotations:
+<span class="w">    </span>oncallPager:<span class="w"> </span><span class="m">800</span>-555-1212
+<span class="w">  </span>labels:
+<span class="w">    </span>app:<span class="w"> </span>bingo
+<span class="w">  </span>name:<span class="w"> </span>dev-nginx-deployment-001
+<span class="w">  </span>namespace:<span class="w"> </span>dev
+spec:
+<span class="w">  </span>selector:
+<span class="w">    </span>matchLabels:
+<span class="w">      </span>app:<span class="w"> </span>bingo
+<span class="w">  </span>template:
+<span class="w">    </span>metadata:
+<span class="w">      </span>annotations:
+<span class="w">        </span>oncallPager:<span class="w"> </span><span class="m">800</span>-555-1212
+<span class="w">      </span>labels:
+<span class="w">        </span>app:<span class="w"> </span>bingo
+<span class="w">    </span>spec:
+<span class="w">      </span>containers:
+<span class="w">      </span>-<span class="w"> </span>image:<span class="w"> </span>nginx
+<span class="w">        </span>name:<span class="w"> </span>nginx
+</pre></div>
+</div>
+</section>
+<section id="id19">
+<h4>5.定制和组合资源<a class="headerlink" href="#id19" title="Link to this heading"></a></h4>
+<p>一种常见的做法是在项目中构造资源集合并将其放到同一个文件或目录中管理。 Kustomize 提供基于不同文件来组织资源并向其应用补丁或者其他定制的能力</p>
+<section id="id20">
+<h5>1.组合<a class="headerlink" href="#id20" title="Link to this heading"></a></h5>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建 deployment.yaml 文件</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">ports</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">containerPort</span><span class="p">:</span> <span class="mi">80</span>
+<span class="n">EOF</span>
+
+<span class="c1"># 创建 service.yaml 文件</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">service</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">ports</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">port</span><span class="p">:</span> <span class="mi">80</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">EOF</span>
+
+<span class="c1"># 创建 kustomization.yaml 来组织以上两个资源</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;./</span><span class="n">kustomization</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">resources</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="o">-</span> <span class="n">service</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+</section>
+<section id="id21">
+<h5>2.定制<a class="headerlink" href="#id21" title="Link to this heading"></a></h5>
+<p>补丁文件（Patches）可以用来对资源执行不同的定制</p>
+<ul class="simple">
+<li><p>patchesStrategicMerge： 策略性合并补丁（Strategic Merge Patch）， 补丁文件中的名称必须与已经加载的资源的名称匹</p></li>
+<li><p>patchesJson6902: 应用 JSON 补丁，支持对任何资源的任何字段进行修改</p></li>
+</ul>
+<p><img alt="../_images/kustomize01.png" src="../_images/kustomize01.png" /></p>
+<p><strong>1.patchesStrategicMerge补丁</strong>
+构造一个补丁来增加 Deployment 的副本个数；构造另外一个补丁来设置内存限制</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建 deployment.yaml 文件</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">ports</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">containerPort</span><span class="p">:</span> <span class="mi">80</span>
+<span class="n">EOF</span>
+
+<span class="c1"># 生成一个补丁 increase_replicas.yaml</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">increase_replicas</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">3</span>
+<span class="n">EOF</span>
+
+<span class="c1"># 生成另一个补丁 set_memory.yaml</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">set_memory</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+        <span class="n">resources</span><span class="p">:</span>
+          <span class="n">limits</span><span class="p">:</span>
+            <span class="n">memory</span><span class="p">:</span> <span class="mi">512</span><span class="n">Mi</span>
+<span class="n">EOF</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;./</span><span class="n">kustomization</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">resources</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">patchesStrategicMerge</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">increase_replicas</span><span class="o">.</span><span class="n">yaml</span>
+<span class="o">-</span> <span class="n">set_memory</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+<p><strong>2.JSON应用补丁</strong></p>
+<p>为了给 JSON 补丁找到正确的资源，需要在 kustomization.yaml 文件中指定资源的组（group）、 版本（version）、类别（kind）和名称（name），支持对任何资源的任何字段进行修改。</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建一个 deployment.yaml 文件</span>
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt; deployment.yaml</span>
+<span class="s">apiVersion: apps/v1</span>
+<span class="s">kind: Deployment</span>
+<span class="s">metadata:</span>
+<span class="s">  name: my-nginx</span>
+<span class="s">spec:</span>
+<span class="s">  selector:</span>
+<span class="s">    matchLabels:</span>
+<span class="s">      run: my-nginx</span>
+<span class="s">  replicas: 2</span>
+<span class="s">  template:</span>
+<span class="s">    metadata:</span>
+<span class="s">      labels:</span>
+<span class="s">        run: my-nginx</span>
+<span class="s">    spec:</span>
+<span class="s">      containers:</span>
+<span class="s">      - name: my-nginx</span>
+<span class="s">        image: nginx</span>
+<span class="s">        ports:</span>
+<span class="s">        - containerPort: 80</span>
+<span class="s">EOF</span>
+
+<span class="c1"># 创建第一个 JSON 补丁文件</span>
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt; patch.yaml</span>
+<span class="s">- op: replace</span>
+<span class="s">  path: /spec/replicas</span>
+<span class="s">  value: 3</span>
+<span class="s">EOF</span>
+<span class="c1"># 创建第二个JSON补丁文件</span>
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt; patch_namespace.yaml</span>
+<span class="s">- op: replace</span>
+<span class="s">  path: /metadata/namespace</span>
+<span class="s">  value: test</span>
+<span class="s">EOF</span>
+
+<span class="c1"># 创建一个 kustomization.yaml</span>
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt;./kustomization.yaml</span>
+<span class="s">resources:</span>
+<span class="s">- deployment.yaml</span>
+
+<span class="s">patchesJson6902:</span>
+<span class="s">- target:</span>
+<span class="s">    group: apps</span>
+<span class="s">    version: v1</span>
+<span class="s">    kind: Deployment</span>
+<span class="s">    name: my-nginx</span>
+<span class="s">  path: patch.yaml</span>
+<span class="s">- target:</span>
+<span class="s">    group: apps</span>
+<span class="s">    version: v1</span>
+<span class="s">    kind: Deployment</span>
+<span class="s">    name: my-nginx</span>
+<span class="s">  path: patch_namespace.yaml</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+<p><strong>3.定制容器镜像或者字段注入</strong></p>
+<p>除了补丁之外，Kustomize 还提供定制容器镜像或者将其他对象的字段值注入到容器中的能力，并且不需要创建补丁。 例如，你可以通过在 kustomization.yaml 文件的 images 字段设置新的镜像来更改容器中使用的镜像。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">ports</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">containerPort</span><span class="p">:</span> <span class="mi">80</span>
+<span class="n">EOF</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;./</span><span class="n">kustomization</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">resources</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">images</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">nginx</span>
+  <span class="n">newName</span><span class="p">:</span> <span class="n">my</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">registry</span><span class="o">/</span><span class="n">nginx</span>
+  <span class="n">newTag</span><span class="p">:</span> <span class="mf">1.4.0</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+<p>有些时候，Pod 中运行的应用可能需要使用来自其他对象的配置值。 例如，某 Deployment 对象的 Pod 需要从环境变量或命令行参数中读取读取 Service 的名称。 由于在 kustomization.yaml 文件中添加 namePrefix 或 nameSuffix 时 Service 名称可能发生变化，建议不要在命令参数中硬编码 Service 名称。 对于这种使用场景，Kustomize 可以通过 vars 将 Service 名称注入到容器中。</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建一个 deployment.yaml 文件（引用此处的文档分隔符）</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="s1">&#39;EOF&#39;</span> <span class="o">&gt;</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">command</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;--host&quot;</span><span class="p">,</span> <span class="s2">&quot;$(MY_SERVICE_NAME)&quot;</span><span class="p">]</span>
+<span class="n">EOF</span>
+
+<span class="c1"># 创建一个 service.yaml 文件</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">service</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">ports</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">port</span><span class="p">:</span> <span class="mi">80</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="n">EOF</span>
+
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;./</span><span class="n">kustomization</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">namePrefix</span><span class="p">:</span> <span class="n">dev</span><span class="o">-</span>
+<span class="n">nameSuffix</span><span class="p">:</span> <span class="s2">&quot;-001&quot;</span>
+
+<span class="n">resources</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">deployment</span><span class="o">.</span><span class="n">yaml</span>
+<span class="o">-</span> <span class="n">service</span><span class="o">.</span><span class="n">yaml</span>
+
+<span class="nb">vars</span><span class="p">:</span>
+<span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">MY_SERVICE_NAME</span>
+  <span class="n">objref</span><span class="p">:</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+    <span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">EOF</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">kustomize</span> <span class="o">.</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">dev</span><span class="o">-</span><span class="n">my</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="mi">001</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">command</span><span class="p">:</span>
+        <span class="o">-</span> <span class="n">start</span>
+        <span class="o">-</span> <span class="o">--</span><span class="n">host</span>
+        <span class="o">-</span> <span class="n">dev</span><span class="o">-</span><span class="n">my</span><span class="o">-</span><span class="n">nginx</span><span class="o">-</span><span class="mi">001</span>
+        <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="id22">
+<h3>基准与覆盖<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<p>Kustomize 中有 基准（bases） 和 覆盖（overlays） 的概念区分。 基准 是包含 kustomization.yaml 文件的一个目录，其中包含一组资源及其相关的定制。 基准可以是本地目录或者来自远程仓库的目录，只要其中存在 kustomization.yaml 文件即可。 覆盖 也是一个目录，其中包含将其他 kustomization 目录当做 bases 来引用的 kustomization.yaml 文件。 基准不了解覆盖的存在，且可被多个覆盖所使用。 覆盖则可以有多个基准，且可针对所有基准中的资源执行组织操作，还可以在其上执行定制。</p>
+<p><img alt="../_images/kustomize02.png" src="../_images/kustomize02.png" /></p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># 创建一个包含基准的目录</span>
+mkdir<span class="w"> </span>base
+<span class="c1"># 创建 base/deployment.yaml</span>
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt; base/deployment.yaml</span>
+<span class="s">apiVersion: apps/v1</span>
+<span class="s">kind: Deployment</span>
+<span class="s">metadata:</span>
+<span class="s">  name: my-nginx</span>
+<span class="s">spec:</span>
+<span class="s">  selector:</span>
+<span class="s">    matchLabels:</span>
+<span class="s">      run: my-nginx</span>
+<span class="s">  replicas: 2</span>
+<span class="s">  template:</span>
+<span class="s">    metadata:</span>
+<span class="s">      labels:</span>
+<span class="s">        run: my-nginx</span>
+<span class="s">    spec:</span>
+<span class="s">      containers:</span>
+<span class="s">      - name: my-nginx</span>
+<span class="s">        image: nginx</span>
+<span class="s">EOF</span>
+
+<span class="c1"># 创建 base/service.yaml 文件</span>
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt; base/service.yaml</span>
+<span class="s">apiVersion: v1</span>
+<span class="s">kind: Service</span>
+<span class="s">metadata:</span>
+<span class="s">  name: my-nginx</span>
+<span class="s">  labels:</span>
+<span class="s">    run: my-nginx</span>
+<span class="s">spec:</span>
+<span class="s">  ports:</span>
+<span class="s">  - port: 80</span>
+<span class="s">    protocol: TCP</span>
+<span class="s">  selector:</span>
+<span class="s">    run: my-nginx</span>
+<span class="s">EOF</span>
+
+<span class="c1"># 创建 base/kustomization.yaml</span>
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt; base/kustomization.yaml</span>
+<span class="s">resources:</span>
+<span class="s">- deployment.yaml</span>
+<span class="s">- service.yaml</span>
+<span class="s">EOF</span>
+</pre></div>
+</div>
+<p>此基准可在多个覆盖中使用。你可以在不同的覆盖中添加不同的 namePrefix 或其他贯穿性字段。 下面是两个使用同一基准的覆盖：</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>dev
+cat<span class="w"> </span><span class="s">&lt;&lt;EOF &gt; dev/kustomization.yaml</span>
+<span class="s">resources:</span>
+<span class="s">- ../base</span>
+<span class="s">namespace: dev</span>
+<span class="s">EOF</span>
+
+
+<span class="o">[</span>root@k8s-master-01<span class="w"> </span>k8<span class="o">]</span><span class="c1"># kubectl  kustomize dev/           </span>
+apiVersion:<span class="w"> </span>v1
+kind:<span class="w"> </span>Service
+metadata:
+<span class="w">  </span>labels:
+<span class="w">    </span>run:<span class="w"> </span>my-nginx
+<span class="w">  </span>name:<span class="w"> </span>my-nginx
+<span class="w">  </span>namespace:<span class="w"> </span>dev
+spec:
+<span class="w">  </span>ports:
+<span class="w">  </span>-<span class="w"> </span>port:<span class="w"> </span><span class="m">80</span>
+<span class="w">    </span>protocol:<span class="w"> </span>TCP
+<span class="w">  </span>selector:
+<span class="w">    </span>run:<span class="w"> </span>my-nginx
+---
+apiVersion:<span class="w"> </span>apps/v1
+kind:<span class="w"> </span>Deployment
+metadata:
+<span class="w">  </span>name:<span class="w"> </span>my-nginx
+<span class="w">  </span>namespace:<span class="w"> </span>dev
+spec:
+<span class="w">  </span>replicas:<span class="w"> </span><span class="m">2</span>
+<span class="w">  </span>selector:
+<span class="w">    </span>matchLabels:
+<span class="w">      </span>run:<span class="w"> </span>my-nginx
+<span class="w">  </span>template:
+<span class="w">    </span>metadata:
+<span class="w">      </span>labels:
+<span class="w">        </span>run:<span class="w"> </span>my-nginx
+<span class="w">    </span>spec:
+<span class="w">      </span>containers:
+<span class="w">      </span>-<span class="w"> </span>image:<span class="w"> </span>nginx
+<span class="w">        </span>name:<span class="w"> </span>my-nginx
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">prod</span>
+<span class="n">cat</span> <span class="o">&lt;&lt;</span><span class="n">EOF</span> <span class="o">&gt;</span> <span class="n">prod</span><span class="o">/</span><span class="n">kustomization</span><span class="o">.</span><span class="n">yaml</span>
+<span class="n">resources</span><span class="p">:</span>
+<span class="o">-</span> <span class="o">../</span><span class="n">base</span>
+<span class="n">namespace</span><span class="p">:</span> <span class="n">prod</span>
+<span class="n">EOF</span>
+
+<span class="n">k8</span><span class="p">]</span><span class="c1"># kubectl  kustomize prod/</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">labels</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">prod</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">ports</span><span class="p">:</span>
+  <span class="o">-</span> <span class="n">port</span><span class="p">:</span> <span class="mi">80</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="n">TCP</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="p">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1</span>
+<span class="n">kind</span><span class="p">:</span> <span class="n">Deployment</span>
+<span class="n">metadata</span><span class="p">:</span>
+  <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">namespace</span><span class="p">:</span> <span class="n">prod</span>
+<span class="n">spec</span><span class="p">:</span>
+  <span class="n">replicas</span><span class="p">:</span> <span class="mi">2</span>
+  <span class="n">selector</span><span class="p">:</span>
+    <span class="n">matchLabels</span><span class="p">:</span>
+      <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+  <span class="n">template</span><span class="p">:</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">containers</span><span class="p">:</span>
+      <span class="o">-</span> <span class="n">image</span><span class="p">:</span> <span class="n">nginx</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">my</span><span class="o">-</span><span class="n">nginx</span>
+</pre></div>
+</div>
+</section>
+<section id="id23">
+<h3>kustomize管理对象<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<section id="id24">
+<h4>1.应用对象<a class="headerlink" href="#id24" title="Link to this heading"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>apply<span class="w"> </span>-k<span class="w"> </span>&lt;customize_dir&gt;
+</pre></div>
+</div>
+</section>
+<section id="id25">
+<h4>2.查看对象<a class="headerlink" href="#id25" title="Link to this heading"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>kubectl<span class="w"> </span>get<span class="w"> </span>-k<span class="w"> </span>&lt;customize_dir&gt;
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">describe</span> <span class="o">-</span><span class="n">k</span> <span class="o">&lt;</span><span class="n">customize_dir</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="id26">
+<h4>3.比较对象<a class="headerlink" href="#id26" title="Link to this heading"></a></h4>
+<p>比较对象与清单被应用之后集群将处于的状态</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">diff</span> <span class="o">-</span><span class="n">k</span> <span class="o">&lt;</span><span class="n">customize_dir</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</section>
+<section id="id27">
+<h4>4.删除对象<a class="headerlink" href="#id27" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">kubectl</span> <span class="n">delete</span> <span class="o">-</span><span class="n">k</span> <span class="o">./</span>
 </pre></div>
 </div>
 </section>

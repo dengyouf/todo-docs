@@ -845,3 +845,687 @@ reg.linux.io]# helm install --ca-file ca.crt  \
   --username admin --password admin123 \
   --version 0.1.0 helmharbor/myapp 
 ```
+
+## Kustomize
+
+### Kustomize介绍
+
+> [官网](https://kubernetes.io/zh-cn/docs/tasks/manage-kubernetes-objects/kustomization/) : `https://kubernetes.io/zh-cn/docs/tasks/manage-kubernetes-objects/kustomization/`
+
+为了解决不同应用在不同环境中存在使用不同配置参数的复杂问题，容器的生太出现了helm，他简化了应用部署的管理难度。helm 类似与kubernetes程序包管理器，用于应用的配置分发，版本控制、查找等操作。他的核心功能十八 kubernetes资源对象打包到一个Charts中，制作完成的各个Charts保存到Charts仓库进行存储和转发。虽然helm可以解决资源对象声明周期管理已经通过模板进行版本控制，但是helm使用起来复杂，只想管理不同环境的yaml配置，helm引入了模板的概念，是的使用的复杂度更高。所以云原生社区提供了一个Kustomize工具，这个工具可以打包不同环境的yaml配置，，并在kubernetes v1.14以后集成到kubectl命令中，这是一个比Helm更轻量的配置管理工具。
+
+- helm： 包管理工具
+- kustomize：配置管理工具
+
+> helm为了解决kubernetes集群中包安装管理的问题，kustomize是组合多个yaml实现轻量程序配置的工具
+
+### Kustomize设计理念
+
+Kustomize 允许用户以一个应用描述文件(YAML文件) 为基础(Base YAML),然后通过Overlay的方式生成最终部署应用所需要的描述文件。两者都是由 kustomization 文件表示。 基础(Base YAML)声明了共享的内容(资源清单和常见的资源配置)，Overlay则声明了差异，他的设计目的是给 kubernets的用户提供一种可以重复使用同一套配置的声明式应用管理，从而在配置工作中的用户只需要管理和维护 kubernetes 的Api 对象，而不需要学习或安装其它的配置管理工具，也不需要复制粘贴来得到新的环境的配置。
+
+**Kustomize 是一个独立的工具，用来通过 kustomization 文件定制kubernetes对象**
+- 从其它来源生成资源
+- 为资源设置贯穿性字段
+- 组织和定制资源集合
+
+### Kustomize 使用
+
+#### 1.管理资源对象
+
+从 kuberentes v1.14版本开始，kubectl 原生支持使用 kustomization 文件来管理 kubernetes对象
+
+- 命令格式
+  - 渲染：kubectl kustomize <customization_dir>
+  - 应用： kubectl apply -k <customization_dir>
+
+#### 2.configMapGenerator生成资源
+
+1. 基于属性文件生成configmap
+
+```
+#根据 application.properties文件的数据生成ConfigMap示例
+k1]# cat > application.properties <<EOF
+FOO=Bar
+EOF
+
+# 编写kustomization文件
+k1]# cat > ./kustomization.yaml  <<EOF
+configMapGenerator:
+- name: example-cm-01
+  files:
+  - application.properties
+EOF
+
+# 查看渲染结果
+k1]# kubectl kustomize ./
+apiVersion: v1
+data:
+  application.properties: |
+    FOO=Bar
+kind: ConfigMap
+metadata:
+  name: example-cm-01-g4hk9g2ff8
+  
+# 应用部署cm
+k1]# kubectl  apply -k ./ -n test
+configmap/example-cm-01-g4hk9g2ff8 created
+k1]# kubectl  get cm -n test
+NAME                       DATA   AGE
+example-cm-01-g4hk9g2ff8   1      6s
+```
+2.使用env文件生成属性文件
+```
+k2]# cat > envfile <<EOF
+For=Bar
+EOF
+
+k2]# cat > ./kustomization.yaml <<EOF
+configMapGenerator:
+- name: example-cm-02
+  envs:
+  - envfile
+EOF
+
+# 查看渲染
+k2]# kubectl  kustomize ./                 
+apiVersion: v1
+data:
+  For: Bar
+kind: ConfigMap
+metadata:
+  name: example-cm-02-h55gh45c9d
+```
+
+#### 3.使用configMapGenerator生成configMap
+
+在Deployment资源中使用由configMapGenerator生成的configmap
+
+``` 
+# 准备 application.properties文件的数据用于生成ConfigMap
+cat <<EOF >application.properties
+FOO=Bar
+EOF
+
+cat <<EOF >deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: app
+        image: nginx:1.20
+        volumeMounts:
+        - name: config
+          mountPath: /config
+      volumes:
+      - name: config
+        configMap:
+          name: example-configmap-1 # 这里需要匹配下面的name
+EOF
+
+cat <<EOF >./kustomization.yaml
+resources:
+- deployment.yaml
+configMapGenerator:
+- name: example-configmap-1
+  files:
+  - application.properties
+EOF
+```
+
+#### 4.设置贯穿性字段
+在项目中为所有 Kubernetes 对象设置贯穿性字段是一种常见操作。 贯穿性字段的一些使用场景如下：
+
+- 为所有资源设置相同的名字空间
+- 为所有对象添加相同的前缀或后缀
+- 为对象添加相同的标签集合
+- 为对象添加相同的注解集合
+
+``` 
+# 创建一个 deployment.yaml
+cat <<EOF >./deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+EOF
+
+cat <<EOF >./kustomization.yml
+namespace: dev
+namePrefix: dev-
+nameSuffix: "-001"
+commonLabels:
+  app: bingo
+commonAnnotations:
+  oncallPager: 800-555-1212
+resources:
+- deployment.yaml
+EOF
+```
+```shell
+k5]# kubectl  kustomize ./
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    oncallPager: 800-555-1212
+  labels:
+    app: bingo
+  name: dev-nginx-deployment-001
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: bingo
+  template:
+    metadata:
+      annotations:
+        oncallPager: 800-555-1212
+      labels:
+        app: bingo
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+```
+
+#### 5.定制和组合资源
+
+一种常见的做法是在项目中构造资源集合并将其放到同一个文件或目录中管理。 Kustomize 提供基于不同文件来组织资源并向其应用补丁或者其他定制的能力
+
+##### 1.组合
+
+``` 
+# 创建 deployment.yaml 文件
+cat <<EOF > deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - name: my-nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+EOF
+
+# 创建 service.yaml 文件
+cat <<EOF > service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: my-nginx
+EOF
+
+# 创建 kustomization.yaml 来组织以上两个资源
+cat <<EOF >./kustomization.yaml
+resources:
+- deployment.yaml
+- service.yaml
+EOF
+```
+
+##### 2.定制
+
+补丁文件（Patches）可以用来对资源执行不同的定制
+
+- patchesStrategicMerge： 策略性合并补丁（Strategic Merge Patch）， 补丁文件中的名称必须与已经加载的资源的名称匹
+- patchesJson6902: 应用 JSON 补丁，支持对任何资源的任何字段进行修改
+
+![](../images/kustomize01.png)
+
+**1.patchesStrategicMerge补丁**
+构造一个补丁来增加 Deployment 的副本个数；构造另外一个补丁来设置内存限制
+``` 
+# 创建 deployment.yaml 文件
+cat <<EOF > deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - name: my-nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+EOF
+
+# 生成一个补丁 increase_replicas.yaml
+cat <<EOF > increase_replicas.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  replicas: 3
+EOF
+
+# 生成另一个补丁 set_memory.yaml
+cat <<EOF > set_memory.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  template:
+    spec:
+      containers:
+      - name: my-nginx
+        resources:
+          limits:
+            memory: 512Mi
+EOF
+
+cat <<EOF >./kustomization.yaml
+resources:
+- deployment.yaml
+patchesStrategicMerge:
+- increase_replicas.yaml
+- set_memory.yaml
+EOF
+```
+
+**2.JSON应用补丁**
+
+为了给 JSON 补丁找到正确的资源，需要在 kustomization.yaml 文件中指定资源的组（group）、 版本（version）、类别（kind）和名称（name），支持对任何资源的任何字段进行修改。
+
+```shell
+# 创建一个 deployment.yaml 文件
+cat <<EOF > deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - name: my-nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+EOF
+
+# 创建第一个 JSON 补丁文件
+cat <<EOF > patch.yaml
+- op: replace
+  path: /spec/replicas
+  value: 3
+EOF
+# 创建第二个JSON补丁文件
+cat <<EOF > patch_namespace.yaml
+- op: replace
+  path: /metadata/namespace
+  value: test
+EOF
+
+# 创建一个 kustomization.yaml
+cat <<EOF >./kustomization.yaml
+resources:
+- deployment.yaml
+
+patchesJson6902:
+- target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: my-nginx
+  path: patch.yaml
+- target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: my-nginx
+  path: patch_namespace.yaml
+EOF
+```
+
+**3.定制容器镜像或者字段注入**
+
+除了补丁之外，Kustomize 还提供定制容器镜像或者将其他对象的字段值注入到容器中的能力，并且不需要创建补丁。 例如，你可以通过在 kustomization.yaml 文件的 images 字段设置新的镜像来更改容器中使用的镜像。
+
+``` 
+cat <<EOF > deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - name: my-nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+EOF
+
+cat <<EOF >./kustomization.yaml
+resources:
+- deployment.yaml
+images:
+- name: nginx
+  newName: my.image.registry/nginx
+  newTag: 1.4.0
+EOF
+```
+
+有些时候，Pod 中运行的应用可能需要使用来自其他对象的配置值。 例如，某 Deployment 对象的 Pod 需要从环境变量或命令行参数中读取读取 Service 的名称。 由于在 kustomization.yaml 文件中添加 namePrefix 或 nameSuffix 时 Service 名称可能发生变化，建议不要在命令参数中硬编码 Service 名称。 对于这种使用场景，Kustomize 可以通过 vars 将 Service 名称注入到容器中。
+
+``` 
+# 创建一个 deployment.yaml 文件（引用此处的文档分隔符）
+cat <<'EOF' > deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - name: my-nginx
+        image: nginx
+        command: ["start", "--host", "$(MY_SERVICE_NAME)"]
+EOF
+
+# 创建一个 service.yaml 文件
+cat <<EOF > service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: my-nginx
+EOF
+
+cat <<EOF >./kustomization.yaml
+namePrefix: dev-
+nameSuffix: "-001"
+
+resources:
+- deployment.yaml
+- service.yaml
+
+vars:
+- name: MY_SERVICE_NAME
+  objref:
+    kind: Service
+    name: my-nginx
+    apiVersion: v1
+EOF
+```
+``` 
+kubectl kustomize .
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-my-nginx-001
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: my-nginx
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - command:
+        - start
+        - --host
+        - dev-my-nginx-001
+        image: nginx
+        name: my-nginx
+```
+
+### 基准与覆盖
+
+Kustomize 中有 基准（bases） 和 覆盖（overlays） 的概念区分。 基准 是包含 kustomization.yaml 文件的一个目录，其中包含一组资源及其相关的定制。 基准可以是本地目录或者来自远程仓库的目录，只要其中存在 kustomization.yaml 文件即可。 覆盖 也是一个目录，其中包含将其他 kustomization 目录当做 bases 来引用的 kustomization.yaml 文件。 基准不了解覆盖的存在，且可被多个覆盖所使用。 覆盖则可以有多个基准，且可针对所有基准中的资源执行组织操作，还可以在其上执行定制。
+
+![](../images/kustomize02.png)
+
+```shell
+# 创建一个包含基准的目录
+mkdir base
+# 创建 base/deployment.yaml
+cat <<EOF > base/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - name: my-nginx
+        image: nginx
+EOF
+
+# 创建 base/service.yaml 文件
+cat <<EOF > base/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: my-nginx
+EOF
+
+# 创建 base/kustomization.yaml
+cat <<EOF > base/kustomization.yaml
+resources:
+- deployment.yaml
+- service.yaml
+EOF
+```
+
+此基准可在多个覆盖中使用。你可以在不同的覆盖中添加不同的 namePrefix 或其他贯穿性字段。 下面是两个使用同一基准的覆盖：
+
+```shell
+mkdir dev
+cat <<EOF > dev/kustomization.yaml
+resources:
+- ../base
+namespace: dev
+EOF
+
+
+[root@k8s-master-01 k8]# kubectl  kustomize dev/           
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: my-nginx
+  name: my-nginx
+  namespace: dev
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: my-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+  namespace: dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: my-nginx
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - image: nginx
+        name: my-nginx
+```
+```
+mkdir prod
+cat <<EOF > prod/kustomization.yaml
+resources:
+- ../base
+namespace: prod
+EOF
+
+k8]# kubectl  kustomize prod/
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: my-nginx
+  name: my-nginx
+  namespace: prod
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+  selector:
+    run: my-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+  namespace: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: my-nginx
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      containers:
+      - image: nginx
+        name: my-nginx
+```
+
+### kustomize管理对象
+
+#### 1.应用对象
+```shell
+kubectl apply -k <customize_dir>
+```
+
+#### 2.查看对象
+
+```shell
+kubectl get -k <customize_dir>
+```
+``` 
+kubectl describe -k <customize_dir>
+```
+
+#### 3.比较对象
+比较对象与清单被应用之后集群将处于的状态
+``` 
+kubectl diff -k <customize_dir>
+```
+
+#### 4.删除对象
+
+``` 
+kubectl delete -k ./
+```
+

@@ -19,6 +19,7 @@
    kubernetes/helm.md
    kubernetes/network.md
    kubernetes/cicd.md
+   kubernetes/monitor.md
 
 
 

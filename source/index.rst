@@ -17,6 +17,8 @@
    kubernetes/secure.md
    kubernetes/storage.md
    kubernetes/helm.md
+   kubernetes/network.md
+   kubernetes/cicd.md
 
 
 
